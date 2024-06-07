@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="usuario.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <title>Crear Cuenta</title>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div id="nav-principal">
+
+                <img src="../imagenes/logo.jpg" alt="Logo de Sagitario Store" class="navbar-logo">
+                <div class="navbar-left">
+
+                    <ul>
+                        <li>
+                            <a href="/ProyectoTienda/index.html">Inicio</a>
+                        </li>
+                        <li class="drop-down-menu">
+                            <button class="drop-down-button">Categorías</button>
+                            <i class="fa fa-caret-down"></i>
+                            <div class="drop-down-menu-content">
+                                <a href="../Anime/Anime.html">Anime</a>
+                                <a href="../SUPERHÉROES/superheroes.html">Superhéroes</a>
+                                <a href="#">Otros</a>
+                            </div>
+                        </li>
+                          
+                        <li>
+                            <input type="text" placeholder="Buscar">
+                        </li>
+                    </ul>
+
+                </div>
+                <div class="navbar-right">
+                    <ul>
+                        <li>
+                            <a href="../usuario/usuario.html">Iniciar Sesión</a>
+                        </li>
+                        <li class="navbar-user">
+                            <img src="../iconos/icon_user.png" alt="Ícono de usuario" width="50" height="50">
+                        </li>
+                        <li class="navbar-shopping-cart">
+                            <img src="../iconos/icon_shopping_cart.svg" alt="Ícono de carrito de compras" width="50"
+                                height="50">
+
+                        <li class="button_menu">
+                            <input type="checkbox" id="check">
+                            <label for="check" class="checkbtn">
+                                <img class="menu_icon" src="../iconos/icons8-menú-30.png" alt="menu-icon">
+                            </label>
+
+                    </ul>
+
+                </div>
+
+            </div>
+        </nav>
+    </header>
+  
+    <div class="container">
+    
+        <h1>Crea una cuenta</h1>
+        <form action="">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre">
+        <label for="nombre">Apellido</label>
+        <input type="text" id="apellido" required>
+        <label for="email">Correo Electronico</label>
+        <input type="email" id="email" required>
+        <label for="contraseña">contraseña</label>
+        <div class="password-container">
+            <input type="password" id="contraseña" pattern="[a-z0-5]{8,}" required>
+            <i class='bx bx-show-alt'></i>
+        </div>
+        <input type="submit">
+
+    </form>
+   </div>
+    <footer>
+        <div class="footer-wraper">
+            <div class="letrero">
+                <h1>Contáctanos</h1>
+            </div>
+           
+            <div class="RedesSociales">
+                <ul>
+                    <li class="facebook_logo">
+                        <a id="facebook" target="_blank" href="https://www.facebook.com/sagitariostorebo">
+                            <img src="../iconos/facebook.png" alt="logo_facebook" width="50px" height="50px">
+                            <p>Visita la página</p>
+                        </a>
+                    </li>
+                    <li class="whatsapp_logo">
+                        <a target="_blank" href="">
+                            <img src="../iconos/whatsapp.png" alt="logo_whatsapp" width="50px" height="50px">
+                            <p>Chatea en WhatsApp</p>
+                        </a>
+
+                    </li>
+                    <li class="whatsapp_logo">
+                        <a target="_blank" href="">
+                            <img src="../iconos/zyro-image (2) (1).png" alt="logo_whatsapp" width="50px" height="50px">
+                            <p>Únete a nuestro grupo de WhatsApp</p>
+                        </a>
+
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+    <script src="../principal/java.js"></script>
+</body>
+
+</html>
