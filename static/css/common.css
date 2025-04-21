@@ -1,0 +1,242 @@
+@import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('variables.css');
+
+/* === Base Reset & Body Styles === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+    transition: var(--transition); /* Considerar si esta transición global es deseada */
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px; /* Base font size */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    padding-top: var(--navbar-height, 80px); /* Fallback height */
+    background: var(--background);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: var(--font-size-base); /* Usar variable base */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* === Container === */
+.container {
+    width: 90%;
+    max-width: var(--container-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* === Basic Link Styling === */
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+/* === Headings === */
+h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 1rem;
+    font-weight: var(--font-weight-bold);
+    line-height: 1.3;
+    color: var(--text-dark); /* Usar color de texto más oscuro para encabezados */
+}
+
+h1 { font-size: var(--font-size-2xl); }
+h2 { font-size: var(--font-size-xl); }
+h3 { font-size: var(--font-size-lg); }
+h4 { font-size: var(--font-size-md); } /* Ajustado, era base */
+h5 { font-size: var(--font-size-sm); }
+h6 { font-size: var(--font-size-xs); }
+
+/* === Paragraphs & Text === */
+p {
+    margin-bottom: 1rem;
+}
+
+/* === Utility Classes === */
+
+/* Display */
+.d-block { display: block; }
+.d-inline-block { display: inline-block; }
+.d-flex { display: flex; }
+.d-inline-flex { display: inline-flex; }
+.d-grid { display: grid; }
+.d-none { display: none; }
+
+/* Flexbox */
+.flex-row { flex-direction: row; }
+.flex-column { flex-direction: column; }
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.align-start { align-items: flex-start; }
+.align-end { align-items: flex-end; }
+.align-center { align-items: center; }
+.align-stretch { align-items: stretch; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+.flex-grow-1 { flex-grow: 1; }
+
+/* Grid */
+.gap-1 { gap: var(--spacing-xs); }
+.gap-2 { gap: var(--spacing-sm); }
+.gap-3 { gap: var(--spacing-md); }
+.gap-4 { gap: var(--spacing-lg); }
+.gap-5 { gap: var(--spacing-xl); }
+
+/* Spacing (Margin & Padding) - Example for margin-bottom */
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+.mb-5 { margin-bottom: var(--spacing-xl); }
+/* Add more spacing utilities as needed (mt, ml, mr, my, mx, pt, pb, pl, pr, py, px) */
+
+/* Text Alignment */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+/* Text Styling */
+.text-primary { color: var(--primary); }
+.text-secondary { color: var(--secondary); }
+.text-accent { color: var(--accent); }
+.text-light { color: var(--text-light); }
+.text-muted { color: var(--text-muted); }
+.text-success { color: var(--success); }
+.text-error { color: var(--error); }
+.text-warning { color: var(--warning); }
+.text-info { color: var(--info); }
+
+.fw-light { font-weight: var(--font-weight-light); }
+.fw-normal { font-weight: var(--font-weight-normal); }
+.fw-medium { font-weight: var(--font-weight-medium); }
+.fw-semibold { font-weight: var(--font-weight-semibold); }
+.fw-bold { font-weight: var(--font-weight-bold); }
+
+/* Background Colors */
+.bg-primary { background-color: var(--primary); }
+.bg-secondary { background-color: var(--secondary); }
+.bg-light { background-color: var(--background); }
+.bg-white { background-color: #ffffff; }
+.bg-dark { background-color: var(--text-dark); }
+
+/* === Standard Section Styling === */
+.section {
+    padding: var(--spacing-xl) 0; /* Usar variables */
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: var(--spacing-xl); /* Usar variables */
+}
+
+.section-title h2 {
+    font-size: 2.2rem; /* Ajustar tamaño */
+    color: var(--primary);
+    margin-bottom: var(--spacing-sm); /* Reducir espacio */
+    font-weight: var(--font-weight-bold);
+}
+
+.section-title p {
+    color: var(--text-muted); /* Usar variable */
+    font-size: var(--font-size-lg); /* Usar variable */
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* === Responsive Adjustments for Base Styles === */
+@media (max-width: 768px) {
+    html {
+        font-size: 15px; /* Slightly smaller base font on mobile */
+    }
+
+    body {
+        padding-top: calc(var(--navbar-height, 80px) - 20px); /* Adjust based on mobile navbar height */
+    }
+
+    .section {
+        padding: var(--spacing-lg) 0;
+    }
+
+    .section-title h2 {
+        font-size: 1.8rem;
+    }
+
+    .section-title p {
+        font-size: var(--font-size-md);
+    }
+}
+
+/* === Messages/Alerts Styling (Moved from base.html potentially) === */
+.messages {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.alert {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border: 1px solid transparent;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.alert i { /* Assuming icons are used */
+    font-size: 1.2em;
+}
+
+.alert-success {
+    color: var(--success-dark);
+    background-color: var(--success-light);
+    border-color: var(--success);
+}
+
+.alert-info {
+    color: var(--info-dark);
+    background-color: var(--info-light);
+    border-color: var(--info);
+}
+
+.alert-warning {
+    color: var(--warning-dark);
+    background-color: var(--warning-light);
+    border-color: var(--warning);
+}
+
+.alert-error {
+    color: var(--error-dark);
+    background-color: var(--error-light);
+    border-color: var(--error);
+}
+
+/* Add styles for other message tags if needed */
+.alert-debug {
+    color: #666;
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}

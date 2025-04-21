@@ -1,0 +1,526 @@
+{% extends "base.html" %}
+{% load static %}
+{% load mathfilters %} {# Add this if you need math filters for rating_ceil calculation #}
+
+{% block title %}{{ product.name }} - Sagitario Store{% endblock %}
+
+{% block meta_description %}{{ product.description|truncatewords:30 }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/vista_producto.css' %}">
+{# FontAwesome is already included in base.html, no need to link it again here #}
+{# <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> #}
+{% endblock %}
+
+{% block content %}
+<main class="product-detail-container container"> {# Added .container for consistent padding #}
+    {# Updated breadcrumbs structure #}
+    <nav aria-label="breadcrumb" class="breadcrumbs mb-4"> {# Use breadcrumbs component and add margin #}
+        <span class="breadcrumbs__item"><a href="{% url 'home' %}" class="breadcrumbs__link">Inicio</a></span>
+        <span class="breadcrumbs__item"><a href="{% url 'productos:categoria' product.category.slug %}" class="breadcrumbs__link">{{ product.category.name }}</a></span>
+        <span class="breadcrumbs__item breadcrumbs__current" aria-current="page">{{ product.name }}</span>
+    </nav>
+    
+    <div class="product-main">
+        <div class="product-gallery">
+            <div class="main-image">
+                <img id="mainProductImage" src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}" alt="{{ product.name }}">
+                
+                {% if product.discount_percent %}
+                <div class="badge badge--error product-badge discount">-{{ product.discount_percent }}%</div> {# Use badge component #}
+                {% elif product.stock > 0 and product.stock <= 5 %}
+                <div class="badge badge--warning product-badge stock">¡Últimas unidades!</div> {# Use badge component #}
+                {% elif product.stock <= 0 %}
+                <div class="badge badge--secondary product-badge out-of-stock">Agotado</div> {# Use badge component #}
+                {% endif %}
+            </div>
+            <div class="thumbnail-gallery">
+                <img class="thumbnail active" src="{{ product.image.url }}" alt="{{ product.name }}" onclick="changeImage(this)">
+                {% for image in product.additional_images.all %}
+                <img class="thumbnail" src="{{ image.image.url }}" alt="{{ product.name }}" onclick="changeImage(this)">
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="product-info">
+            <h1>{{ product.name }}</h1>
+            
+            {% if product.stock > 0 %}
+                {% if product.stock <= 5 %}
+                <div class="stock-status low-stock alert alert-warning"> {# Use alert component classes #}
+                    <i class="fas fa-exclamation-circle"></i> 
+                    Quedan pocas unidades ({{ product.stock }} disponibles)
+                </div>
+                {% else %}
+                <div class="stock-status in-stock alert alert-success"> {# Use alert component classes #}
+                    <i class="fas fa-check-circle"></i> 
+                    En stock ({{ product.stock }} disponibles)
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="stock-status out-of-stock alert alert-error"> {# Use alert component classes #}
+                    <i class="fas fa-times-circle"></i> 
+                    Agotado
+                </div>
+            {% endif %}
+            
+            <div class="product-rating">
+                <span class="stars">
+                    {% with rating_floor=product.rating|floor rating_ceil=product.rating|ceil %}
+                    {% for i in "12345" %}
+                    <i class="{% if i|add:0 <= rating_floor %}fas fa-star{% elif i|add:0 == rating_ceil and product.rating != rating_floor %}fas fa-star-half-alt{% else %}far fa-star{% endif %}"></i>
+                    {% endfor %}
+                    {% endwith %}
+                </span>
+                <span class="review-count">({{ product.reviews.count }} reseñas)</span>
+            </div>
+            
+            <div class="product-price">
+                <span class="current-price">{{ product.price }} Bs</span>
+                {% if product.original_price %}
+                <span class="original-price">{{ product.original_price }} Bs</span>
+                <span class="discount badge badge--error">-{{ product.discount_percent }}%</span> {# Use badge component #}
+                {% endif %}
+            </div>
+            
+            <div class="product-description">
+                {{ product.description|safe }}
+            </div>
+            
+            <form class="product-actions form-group" method="post" action="{% url 'carrito:agregar' %}"> {# Added form-group #}
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+                
+                <div class="quantity-selector form-group"> {# Added form-group #}
+                    <label for="quantity" class="form-label visually-hidden">Cantidad</label> {# Added label #}
+                    <button type="button" class="quantity-btn minus btn btn--secondary btn--sm" onclick="updateQuantity(-1)"> {# Use btn component #}
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" 
+                           max="{{ product.stock|default:"0" }}" 
+                           data-max-stock="{{ product.stock|default:"0" }}" 
+                           class="form-control quantity-input" {# Use form-control #}
+                           {% if not product.stock or product.stock <= 0 %}disabled{% endif %}>
+                    <button type="button" class="quantity-btn plus btn btn--secondary btn--sm" onclick="updateQuantity(1)"> {# Use btn component #}
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                
+                <button type="submit" class="add-to-cart-btn btn btn--primary" {% if not product.stock or product.stock <= 0 %}disabled{% endif %}> {# Use btn component #}
+                    <i class="fas fa-shopping-cart"></i>
+                    Añadir al carrito
+                </button>
+                
+                <button type="button" class="wishlist-btn btn btn--outline-secondary {% if is_in_wishlist %}active{% endif %}"> {# Use btn component #}
+                    <i class="{% if is_in_wishlist %}fas{% else %}far{% endif %} fa-heart"></i>
+                    {% if is_in_wishlist %}En favoritos{% else %}Añadir a favoritos{% endif %}
+                </button>
+            </form>
+            
+            <div class="delivery-info">
+                <div class="delivery-option">
+                    <i class="fas fa-truck"></i>
+                    <span>Envío a domicilio disponible</span>
+                </div>
+                <div class="delivery-option">
+                    <i class="fas fa-store"></i>
+                    <span>Recogida en tienda disponible</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="product-tabs">
+        <div class="tab-header tabs"> {# Use tabs component #}
+            <button class="tab-btn tab active" data-tab="details">Detalles</button> {# Use tab component #}
+            <button class="tab-btn tab" data-tab="reviews">Reseñas</button> {# Use tab component #}
+            <button class="tab-btn tab" data-tab="shipping">Envío</button> {# Use tab component #}
+        </div>
+        
+        <div class="tab-content">
+            <div id="details" class="tab-panel active">
+                <h3>Especificaciones técnicas</h3>
+                {% if product.specifications %}
+                <table class="specs-table table table--bordered"> {# Use table component #}
+                    <tr>
+                        <th>Dimensiones</th>
+                        <td>{{ product.specifications.dimensions|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Peso</th>
+                        <td>{{ product.specifications.weight|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Material</th>
+                        <td>{{ product.specifications.material|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Fabricante</th>
+                        <td>{{ product.specifications.manufacturer|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Código de producto</th>
+                        <td>{{ product.sku|default:"SKU-" }}{{ product.id }}</td>
+                    </tr>
+                </table>
+                {% else %}
+                <p>No hay especificaciones técnicas disponibles para este producto.</p>
+                {% endif %}
+            </div>
+            
+            <div id="reviews" class="tab-panel">
+                <div class="review-summary">
+                    <h3>Reseñas de clientes</h3>
+                    <p>Puntuación media: <strong>{{ product.rating }} de 5</strong></p>
+                </div>
+                
+                <div class="reviews-list">
+                    {% for review in product.reviews.all %}
+                    <div class="review-item card mb-3"> {# Use card component #}
+                        <div class="review-header card__header"> {# Use card component #}
+                            <span class="stars">
+                                {% for i in "12345" %}
+                                <i class="{% if forloop.counter <= review.rating %}fas fa-star{% else %}far fa-star{% endif %}"></i>
+                                {% endfor %}
+                            </span>
+                            <span class="review-author">{{ review.user.get_full_name }}</span>
+                            <span class="review-date text-muted">{{ review.created_at|date:"d/m/Y" }}</span> {# Use text utility #}
+                        </div>
+                        <div class="review-content card__content"> {# Use card component #}
+                            <h4>{{ review.title }}</h4>
+                            <p>{{ review.content }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>No hay reseñas para este producto.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div id="shipping" class="tab-panel">
+                <h3>Información de envío</h3>
+                <div class="shipping-info">
+                    <div class="shipping-option card mb-3"> {# Use card component #}
+                        <div class="card__content"> {# Use card component #}
+                            <h4 class="card__title">Envío estándar</h4> {# Use card component #}
+                            <p class="card__text">Entrega en 3-5 días hábiles</p> {# Use card component #}
+                            <p class="card__text">Precio: 15 Bs</p> {# Use card component #}
+                        </div>
+                    </div>
+                    <div class="shipping-option card mb-3"> {# Use card component #}
+                         <div class="card__content"> {# Use card component #}
+                            <h4 class="card__title">Envío express</h4> {# Use card component #}
+                            <p class="card__text">Entrega en 24-48 horas</p> {# Use card component #}
+                            <p class="card__text">Precio: 30 Bs</p> {# Use card component #}
+                        </div>
+                    </div>
+                    <div class="shipping-option card mb-3"> {# Use card component #}
+                         <div class="card__content"> {# Use card component #}
+                            <h4 class="card__title">Recogida en tienda</h4> {# Use card component #}
+                            <p class="card__text">Disponible en 24 horas</p> {# Use card component #}
+                            <p class="card__text">Gratis</p> {# Use card component #}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if related_products %}
+    <div class="related-products section"> {# Added section class #}
+        <h2 class="section-title">Productos relacionados</h2> {# Added section-title class #}
+        <div class="products-carousel products-grid"> {# Use products-grid for potential fallback/consistency #}
+            {% for related in related_products %}
+            {# Assuming product_card includes necessary structure from products.css #}
+            {% include 'tienda/components/product_card.html' with product=related %} 
+            {% comment %}
+            <!-- Original structure (if not using include): -->
+            <div class="related-product-card product-card card"> <!-- Use product-card and card -->
+                <a href="{% url 'productos:producto' related.slug %}" class="product-card__link">
+                    <div class="product-card__image-wrapper">
+                        <img src="{{ related.image.url }}" alt="{{ related.name }}" class="product-card__img card__image">
+                    </div>
+                    <div class="related-product-info product-card__content card__content">
+                        <h4 class="product-card__title card__title">{{ related.name }}</h4>
+                        <div class="related-product-price product-card__price">
+                            <span class="product-card__current-price">{{ related.price }} Bs</span>
+                        </div>
+                        <button class="quick-buy btn btn--primary btn--sm mt-2" data-product-id="{{ related.id }}"> <!-- Use btn component -->
+                            <i class="fas fa-shopping-cart"></i>
+                            Comprar ahora
+                        </button>
+                    </div>
+                </a>
+            </div>
+            {% endcomment %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Change main product image when thumbnail is clicked
+    function changeImage(element) {
+        document.getElementById('mainProductImage').src = element.src;
+        
+        // Update active thumbnail
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        thumbnails.forEach(thumb => {
+            thumb.classList.remove('active');
+        });
+        element.classList.add('active');
+    }
+    
+    // Update quantity
+    function updateQuantity(change) {
+        const quantityInput = document.getElementById('quantity');
+        // Read max stock from data attribute
+        const max = parseInt(quantityInput.getAttribute('data-max-stock') || '0'); 
+        
+        let value = parseInt(quantityInput.value) + change;
+        
+        // Ensure value is within min/max range
+        if (value < 1) value = 1;
+        if (max > 0 && value > max) value = max; // Only apply max if stock > 0
+        else if (max <= 0) value = 1; // If no stock, reset to 1 (though input should be disabled)
+        
+        quantityInput.value = value;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab functionality
+        const tabBtns = document.querySelectorAll('.tab-btn'); // Uses .tab-btn
+        const tabPanels = document.querySelectorAll('.tab-panel');
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons and panels
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanels.forEach(panel => panel.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding panel
+                this.classList.add('active');
+                const panelId = this.getAttribute('data-tab');
+                document.getElementById(panelId).classList.add('active');
+            });
+        });
+        
+        // Wishlist functionality
+        const wishlistBtn = document.querySelector('.wishlist-btn'); // Uses .wishlist-btn
+        if (wishlistBtn) {
+            wishlistBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = document.querySelector('input[name="product_id"]').value;
+                const heartIcon = this.querySelector('i');
+                const buttonTextNode = this.childNodes[2]; // Get the text node after the icon (might be fragile)
+                let buttonText = buttonTextNode ? buttonTextNode.nodeValue.trim() : null;
+
+                // Optimistically update UI
+                const isAdding = heartIcon.classList.contains('far');
+                if (isAdding) {
+                    heartIcon.classList.replace('far', 'fas');
+                    this.classList.add('active');
+                    if (buttonTextNode) buttonTextNode.nodeValue = ' En favoritos'; // Update text
+                    showNotification('<i class="fas fa-heart"></i> Producto añadido a favoritos', 'success');
+                } else {
+                    heartIcon.classList.replace('fas', 'far');
+                    this.classList.remove('active');
+                     if (buttonTextNode) buttonTextNode.nodeValue = ' Añadir a favoritos'; // Update text
+                    showNotification('<i class="fas fa-heart-broken"></i> Producto eliminado de favoritos', 'success');
+                }
+                
+                // Send AJAX request
+                fetch('{% url "wishlist:toggle" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: 'product_id=' + productId
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // Handle HTTP errors
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.success) {
+                         // Revert UI changes on failure
+                         console.error('Wishlist toggle failed:', data.error);
+                         if (isAdding) {
+                            heartIcon.classList.replace('fas', 'far');
+                            this.classList.remove('active');
+                            if (buttonTextNode) buttonTextNode.nodeValue = ' Añadir a favoritos';
+                         } else {
+                            heartIcon.classList.replace('far', 'fas');
+                            this.classList.add('active');
+                            if (buttonTextNode) buttonTextNode.nodeValue = ' En favoritos';
+                         }
+                         showNotification('<i class="fas fa-exclamation-circle"></i> Error al actualizar favoritos', 'error');
+                    }
+                    // Success message already shown optimistically
+                })
+                .catch(error => {
+                    console.error('Error toggling wishlist:', error);
+                     // Revert UI changes on network/parse error
+                     if (isAdding) {
+                        heartIcon.classList.replace('fas', 'far');
+                        this.classList.remove('active');
+                        if (buttonTextNode) buttonTextNode.nodeValue = ' Añadir a favoritos';
+                     } else {
+                        heartIcon.classList.replace('far', 'fas');
+                        this.classList.add('active');
+                        if (buttonTextNode) buttonTextNode.nodeValue = ' En favoritos';
+                     }
+                    showNotification('<i class="fas fa-exclamation-circle"></i> Error al actualizar favoritos', 'error');
+                });
+            });
+        }
+        
+        // Form validation for add to cart
+        const addToCartForm = document.querySelector('.product-actions'); // Uses .product-actions
+        if (addToCartForm) {
+            addToCartForm.addEventListener('submit', function(e) {
+                const quantityInput = document.getElementById('quantity');
+                const quantity = parseInt(quantityInput.value);
+                // Read max stock from data attribute
+                const maxStock = parseInt(quantityInput.getAttribute('data-max-stock') || '0'); 
+                
+                if (maxStock <= 0) { // Prevent adding if no stock
+                     e.preventDefault();
+                     showNotification('<i class="fas fa-times-circle"></i> Producto agotado', 'error');
+                     return false;
+                }
+                
+                if (quantity <= 0 || quantity > maxStock) {
+                    e.preventDefault();
+                    showNotification('<i class="fas fa-exclamation-circle"></i> Cantidad inválida (Máx: ' + maxStock + ')', 'error');
+                    return false;
+                }
+            });
+        }
+        
+        // Quick buy buttons for related products
+        const quickBuyButtons = document.querySelectorAll('.quick-buy'); // Uses .quick-buy
+        quickBuyButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Get product ID from data attribute
+                const productId = this.getAttribute('data-product-id');
+                
+                if (productId) {
+                    // Add to cart via AJAX
+                    addToCartAjax(productId, 1);
+                } else {
+                    console.error('Product ID not found for quick buy button.');
+                    showNotification('<i class="fas fa-exclamation-circle"></i> No se pudo añadir el producto', 'error');
+                }
+            });
+        });
+
+        // Set initial active thumbnail
+        const firstThumbnail = document.querySelector('.thumbnail');
+        if(firstThumbnail) {
+            firstThumbnail.classList.add('active');
+        }
+    });
+    
+    // Show notification (using toast component style)
+    function showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        // Map type to toast variant
+        const toastTypeClass = `toast--${type}`; // e.g., toast--success, toast--error
+        notification.className = `toast ${toastTypeClass}`; // Use toast classes
+        
+        // Basic structure for toast
+        notification.innerHTML = `
+            <div class="toast__icon">
+                ${message.includes('fa-shopping-cart') ? '<i class="fas fa-shopping-cart"></i>' : 
+                  message.includes('fa-heart-broken') ? '<i class="fas fa-heart-broken"></i>' : 
+                  message.includes('fa-heart') ? '<i class="fas fa-heart"></i>' : 
+                  message.includes('fa-check') ? '<i class="fas fa-check-circle"></i>' : 
+                  '<i class="fas fa-exclamation-circle"></i>'}
+            </div>
+            <div class="toast__content">
+                ${message.replace(/<i class=".*?"><\/i>\s*/, '')} {# Remove icon from message text #}
+            </div>
+            <button class="toast__close" onclick="this.parentElement.remove()">&times;</button>
+        `;
+        
+        // Add to document
+        // Create a container for toasts if it doesn't exist
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            // Add styles for container positioning (could also be in CSS)
+            toastContainer.style.position = 'fixed';
+            toastContainer.style.bottom = 'var(--spacing-lg)';
+            toastContainer.style.right = 'var(--spacing-lg)';
+            toastContainer.style.zIndex = 'var(--z-toast)';
+            toastContainer.style.display = 'flex';
+            toastContainer.style.flexDirection = 'column';
+            toastContainer.style.gap = 'var(--spacing-sm)';
+            document.body.appendChild(toastContainer);
+        }
+        toastContainer.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('toast--visible'); // Use toast visibility class
+        }, 100);
+        
+        // Hide and remove after delay
+        setTimeout(() => {
+            notification.classList.remove('toast--visible');
+            // Wait for transition before removing
+            notification.addEventListener('transitionend', () => {
+                 if (notification.parentElement) {
+                    notification.parentElement.removeChild(notification);
+                 }
+                 // Remove container if empty
+                 if (toastContainer.children.length === 0) {
+                     document.body.removeChild(toastContainer);
+                 }
+            }, { once: true });
+        }, 3000);
+    }
+    
+    // Add to cart via AJAX
+    function addToCartAjax(productId, quantity) {
+        fetch('{% url "carrito:agregar_ajax" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `product_id=${productId}&quantity=${quantity}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                showNotification('<i class="fas fa-shopping-cart"></i> Producto añadido al carrito', 'success');
+                // Update cart count in navbar (optional but recommended)
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount && data.cart_count !== undefined) {
+                    cartCount.textContent = data.cart_count;
+                }
+            } else {
+                showNotification('<i class="fas fa-exclamation-circle"></i> ' + (data.error || 'Error al añadir al carrito'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('<i class="fas fa-exclamation-circle"></i> Error al añadir al carrito', 'error');
+        });
+    }
+</script>
+{% endblock %}

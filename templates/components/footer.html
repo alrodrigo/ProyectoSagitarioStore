@@ -1,0 +1,50 @@
+{% load static %}
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>Enlaces rápidos</h3>
+            <ul>
+                <li><a href="{% url 'productos:home' %}">Inicio</a></li>
+                <li><a href="{% url 'productos:anime' %}">Anime</a></li>
+                <li><a href="{% url 'productos:superheroes' %}">Superhéroes</a></li>
+                <li><a href="{% url 'usuarios:profile' %}">Mi cuenta</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
+            <h3>Atención al cliente</h3>
+            <ul>
+                <li><a href="#">Preguntas frecuentes</a></li>
+                <li><a href="#">Envíos y devoluciones</a></li>
+                <li><a href="#">Términos y condiciones</a></li>
+                <li><a href="#">Política de privacidad</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
+            <h3>Síguenos</h3>
+            <div class="RedesSociales">
+                <ul>
+                    <li class="facebook_logo">
+                        <a href="https://www.facebook.com/sagitariostorebo" target="_blank" aria-label="Facebook de Sagitario Store">
+                            <img src="{% static 'icons/facebook.png' %}" alt="Facebook" width="35" height="35">
+                            <span>Visita nuestra página</span>
+                        </a>
+                    </li>
+                    <li class="whatsapp_logo">
+                        <a href="https://wa.me/59170000000" target="_blank" aria-label="WhatsApp de Sagitario Store">
+                            <img src="{% static 'icons/whatsapp.png' %}" alt="WhatsApp" width="35" height="35">
+                            <span>Chatea con nosotros</span>
+                        </a>
+                    </li>
+                    <li class="whatsapp_logo">
+                        <a href="#" target="_blank" aria-label="Grupo de WhatsApp de Sagitario Store">
+                            <img src="{% static 'icons/whatsapp-group.png' %}" alt="Grupo de WhatsApp" width="35" height="35">
+                            <span>Únete a nuestro grupo</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>

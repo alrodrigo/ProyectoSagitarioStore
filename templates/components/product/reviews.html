@@ -1,0 +1,60 @@
+{% load static %}
+<div class="review-summary">
+    <div class="average-rating">
+        <span class="rating-number">{{ product.rating }}</span>
+        <div class="stars">
+            {% for i in "12345"|make_list %}
+            <i class="fas fa-star{% if forloop.counter > product.rating %}-half-alt{% endif %}"></i>
+            {% endfor %}
+        </div>
+        <span>{{ product.review_count }} reseñas</span>
+    </div>
+</div>
+
+<div class="review-list">
+    {% for review in reviews %}
+    <div class="review-item">
+        <div class="reviewer-info">
+            <div class="reviewer-name">{{ review.user.get_full_name }}</div>
+            <div class="review-date">{{ review.created_at|date:"d F Y" }}</div>
+        </div>
+        <div class="review-rating">
+            {% for i in "12345"|make_list %}
+            <i class="fas fa-star{% if forloop.counter > review.rating %}-half-alt{% endif %}"></i>
+            {% endfor %}
+        </div>
+        <div class="review-content">
+            <p>{{ review.content }}</p>
+        </div>
+    </div>
+    {% empty %}
+    <p class="no-reviews">No hay reseñas todavía. ¡Sé el primero en opinar!</p>
+    {% endfor %}
+</div>
+
+{% if user.is_authenticated %}
+<div class="review-form">
+    <h3>Deja tu reseña</h3>
+    <form method="post" action="{% url 'product_review' product.id %}">
+        {% csrf_token %}
+        <div class="rating-input">
+            <label>Tu valoración:</label>
+            <div class="star-rating">
+                {% for i in "12345"|make_list %}
+                <input type="radio" name="rating" value="{{ forloop.counter }}" id="star{{ forloop.counter }}" required>
+                <label for="star{{ forloop.counter }}"><i class="far fa-star"></i></label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="review-input">
+            <label for="review-content">Tu opinión:</label>
+            <textarea id="review-content" name="content" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="submit-review-btn">Publicar reseña</button>
+    </form>
+</div>
+{% else %}
+<div class="review-login-prompt">
+    <p>Necesitas <a href="{% url 'login' %}?next={{ request.path }}">iniciar sesión</a> para dejar una reseña.</p>
+</div>
+{% endif %}

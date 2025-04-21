@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Inicio - Sagitario Store{% endblock %}
+
+{% block pre_common_css %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <h1>Bienvenido a Sagitario Store</h1>
+    <p>Las mejores figuras coleccionables de anime y superhéroes</p>
+</section>
+
+<section class="categoria-section">
+    <h2>Nuestras Categorías</h2>
+    <div class="categoria-cards">
+        <div class="categoria-card">
+            <img src="{% static 'images/categoria-anime.jpg' %}" alt="Categoría Anime">
+            <a href="{% url 'productos:categoria' 'anime' %}" class="overlay" aria-label="Explora nuestra colección de figuras y productos de tus series de anime favoritas">
+                <div class="overlay-content">
+                    <h3 class="overlay-title">Anime</h3>
+                </div>
+            </a>
+        </div>
+        <div class="categoria-card">
+            <img src="{% static 'images/categoria superheroes.jpg' %}" alt="Categoría Superhéroes">
+            <a href="{% url 'productos:categoria' 'superheroes' %}" class="overlay" aria-label="Descubre figuras de acción de tus superhéroes favoritos">
+                <div class="overlay-content">
+                    <h3 class="overlay-title">Superhéroes</h3>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="productos-section">
+    <h2>Productos Destacados</h2>
+    <div class="productos-grid">
+        {% for producto in products %}
+            <article class="product-card">
+                <a href="{% url 'productos:producto' producto.id %}" class="product-link">
+                    <div class="img-product">
+                        <img src="{{ producto.image.url }}" alt="{{ producto.name }}">
+                    </div>
+                    <div class="product-details">
+                        <h3>{{ producto.name }}</h3>
+                        <div class="product-price">
+                            <span class="current-price">{{ producto.price }} Bs</span>
+                            {% if producto.original_price %}
+                                <span class="original-price">{{ producto.original_price }} Bs</span>
+                                <span class="discount">-{{ producto.discount_percentage }}%</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            </article>
+        {% empty %}
+            <p>No hay productos disponibles en este momento.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

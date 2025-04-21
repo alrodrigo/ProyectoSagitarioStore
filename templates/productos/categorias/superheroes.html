@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Figuras de Superhéroes - Sagitario Store{% endblock %}
+
+{% block meta_description %}Explora nuestra colección de figuras de superhéroes de alta calidad. Encuentra tus personajes favoritos y añádelos a tu colección.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/category.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="category-container">
+    <section class="category-header">
+        <h1>Figuras de Superhéroes</h1>
+        <div class="category-description">
+            <p>Explora nuestra colección de figuras de tus superhéroes favoritos. Todas nuestras figuras son de alta calidad y acabados premium.</p>
+        </div>
+    </section>
+    
+    <div class="filter-controls">
+        <div class="filter-group">
+            <label for="sort-by">Ordenar por:</label>
+            <select id="sort-by" aria-label="Ordenar productos">
+                <option value="popular">Popularidad</option>
+                <option value="price-low">Precio: Menor a mayor</option>
+                <option value="price-high">Precio: Mayor a menor</option>
+                <option value="newest">Más recientes</option>
+            </select>
+        </div>
+        
+        <div class="view-toggle">
+            <button class="view-btn grid active" aria-label="Ver en cuadrícula"><i class="fas fa-th"></i></button>
+            <button class="view-btn list" aria-label="Ver en lista"><i class="fas fa-list"></i></button>
+        </div>
+    </div>
+    
+    <div class="products-container">
+        {% for product in products %}
+        <article class="product-card">
+            <a href="{% url 'productos:producto' product.id %}" class="product-link">
+                <div class="img-product">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" width="250" height="250">
+                    <div class="product-overlay">
+                        <span class="quick-view-btn">Vista rápida</span>
+                    </div>
+                </div>
+                <div class="product-details">
+                    <h2 class="product-title">{{ product.name }}</h2>
+                    <div class="product-price">
+                        <span class="current-price">{{ product.price }} Bs</span>
+                        {% if product.original_price %}
+                        <span class="original-price">{{ product.original_price }} Bs</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-rating">
+                        <span class="stars">
+                            {% for i in "12345" %}
+                            <i class="{% if forloop.counter <= product.rating %}fas fa-star{% elif forloop.counter == product.rating_ceil %}fas fa-star-half-alt{% else %}far fa-star{% endif %}"></i>
+                            {% endfor %}
+                        </span>
+                        <span class="review-count">({{ product.reviews.count }})</span>
+                    </div>
+                </div>
+            </a>
+            <div class="product-actions">
+                <button class="add-to-cart-btn" data-product="{{ product.id }}">
+                    <i class="fas fa-shopping-cart"></i>
+                </button>
+                <button class="wishlist-btn" data-product="{{ product.id }}">
+                    <i class="far fa-heart"></i>
+                </button>
+            </div>
+        </article>
+        {% empty %}
+        <div class="no-products">
+            <h3>No hay productos disponibles</h3>
+            <p>Lo sentimos, no hay productos en esta categoría actualmente.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary">Volver al inicio</a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <button class="pagination-btn prev">
+            <a href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-chevron-left"></i></a>
+        </button>
+        {% else %}
+        <button class="pagination-btn prev" disabled><i class="fas fa-chevron-left"></i></button>
+        {% endif %}
+        
+        <div class="pagination-numbers">
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <button class="page-number active">{{ num }}</button>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <button class="page-number"><a href="?page={{ num }}">{{ num }}</a></button>
+            {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if page_obj.has_next %}
+        <button class="pagination-btn next">
+            <a href="?page={{ page_obj.next_page_number }}"><i class="fas fa-chevron-right"></i></a>
+        </button>
+        {% else %}
+        <button class="pagination-btn next" disabled><i class="fas fa-chevron-right"></i></button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Switch between grid and list view
+        const gridBtn = document.querySelector('.view-btn.grid');
+        const listBtn = document.querySelector('.view-btn.list');
+        const productsContainer = document.querySelector('.products-container');
+        
+        if (gridBtn && listBtn && productsContainer) {
+            gridBtn.addEventListener('click', function() {
+                productsContainer.classList.remove('list-view');
+                gridBtn.classList.add('active');
+                listBtn.classList.remove('active');
+                localStorage.setItem('viewMode', 'grid');
+            });
+            
+            listBtn.addEventListener('click', function() {
+                productsContainer.classList.add('list-view');
+                listBtn.classList.add('active');
+                gridBtn.classList.remove('active');
+                localStorage.setItem('viewMode', 'list');
+            });
+            
+            // Check for saved view preference
+            const savedView = localStorage.getItem('viewMode');
+            if (savedView === 'list') {
+                productsContainer.classList.add('list-view');
+                listBtn.classList.add('active');
+                gridBtn.classList.remove('active');
+            }
+        }
+        
+        // Sort functionality
+        const sortSelect = document.getElementById('sort-by');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function() {
+                const url = new URL(window.location);
+                url.searchParams.set('sort', this.value);
+                window.location.href = url.toString();
+            });
+            
+            // Set selected option based on URL param
+            const urlParams = new URLSearchParams(window.location.search);
+            const sortParam = urlParams.get('sort');
+            if (sortParam) {
+                sortSelect.value = sortParam;
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% load static %}
+<header>
+    <nav aria-label="Navegación principal">
+        <div id="nav-principal">
+            <a href="{% url 'index' %}">
+                <img src="{% static 'images/logo.jpg' %}" alt="Logo de Sagitario Store" class="navbar-logo">
+            </a>
+            <div class="navbar-left">
+                <ul>
+                    <li><a href="{% url 'index' %}">Inicio</a></li>
+                    <li class="drop-down-menu">
+                        <button class="drop-down-button" aria-haspopup="true" aria-expanded="false">Categorías</button>
+                        <i class="fa fa-caret-down" aria-hidden="true"></i>
+                        <div class="drop-down-menu-content">
+                            <a href="{% url 'anime' %}">Anime</a>
+                            <a href="{% url 'superheroes' %}">Superhéroes</a>
+                            <a href="#">Otros</a>
+                        </div>
+                    </li>
+                    <li class="search-container">
+                        <form role="search" action="{% url 'search' %}" method="get" aria-label="Buscar en el sitio">
+                            <input type="text" name="q" placeholder="Buscar" aria-label="Campo de búsqueda" value="{{ request.GET.q }}">
+                            <button type="submit"><i class="fas fa-search" aria-hidden="true"></i></button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <div class="navbar-right">
+                <ul>
+                    {% if user.is_authenticated %}
+                        <li class="drop-down-menu">
+                            <button class="drop-down-button account-button" aria-haspopup="true" aria-expanded="false">
+                                {{ user.get_short_name|default:user.username }}
+                            </button>
+                            <i class="fa fa-caret-down" aria-hidden="true"></i>
+                            <div class="drop-down-menu-content">
+                                <a href="{% url 'profile' %}">Mi Perfil</a>
+                                <a href="{% url 'logout' %}">Cerrar Sesión</a>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li class="drop-down-menu">
+                            <button class="drop-down-button account-button" aria-haspopup="true" aria-expanded="false">Mi Cuenta</button>
+                            <i class="fa fa-caret-down" aria-hidden="true"></i>
+                            <div class="drop-down-menu-content">
+                                <a href="{% url 'login' %}">Iniciar Sesión</a>
+                                <a href="{% url 'register' %}">Crear Cuenta</a>
+                            </div>
+                        </li>
+                    {% endif %}
+                    <li class="navbar-user">
+                        <a href="{% url 'profile' %}" aria-label="Mi perfil">
+                            <img src="{% static 'icons/icon_user.png' %}" alt="Ícono de usuario" width="50" height="50">
+                        </a>
+                    </li>
+                    <li class="navbar-shopping-cart">
+                        <a href="{% url 'cart' %}" aria-label="Ver carrito">
+                            <img src="{% static 'icons/icon_shopping_cart.svg' %}" alt="Ícono de carrito de compras" width="50" height="50">
+                            <span class="cart-count">{{ cart.total_items|default:'0' }}</span>
+                        </a>
+                    </li>
+                    <li class="button_menu">
+                        <input type="checkbox" id="check">
+                        <label for="check" class="checkbtn">
+                            <img class="menu_icon" src="{% static 'icons/icons8-menú-30.png' %}" alt="Icono de menú">
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>

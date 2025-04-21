@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta_description %}{{ producto.name }} - {{ producto.description|truncatewords:20 }}{% endblock %}
+
+{% block title %}{{ producto.name }} - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/vista_producto.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="producto-detalle">
+    <div class="producto-grid">
+        <div class="producto-imagenes">
+            <div class="imagen-principal">
+                <img src="{{ producto.image.url }}" alt="{{ producto.name }}" id="imagen-principal">
+            </div>
+            {% if producto.additional_images.all %}
+            <div class="miniaturas">
+                <img src="{{ producto.image.url }}" alt="{{ producto.name }}" class="miniatura active">
+                {% for imagen in producto.additional_images.all %}
+                <img src="{{ imagen.image.url }}" alt="{{ producto.name }}" class="miniatura">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="producto-info">
+            <nav class="breadcrumb" aria-label="breadcrumb">
+                <ol>
+                    <li><a href="{% url 'productos:home' %}">Inicio</a></li>
+                    <li><a href="{% url 'productos:categoria' producto.category.name %}">{{ producto.category.name }}</a></li>
+                    <li aria-current="page">{{ producto.name }}</li>
+                </ol>
+            </nav>
+
+            <h1>{{ producto.name }}</h1>
+            
+            <div class="producto-meta">
+                <div class="rating">
+                    <span class="stars">
+                        {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= producto.rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    <span class="review-count">({{ producto.review_count }} reseñas)</span>
+                </div>
+                
+                <div class="stock-info">
+                    {% if producto.stock > 0 %}
+                        <span class="disponible"><i class="fas fa-check-circle"></i> En stock</span>
+                    {% else %}
+                        <span class="agotado"><i class="fas fa-times-circle"></i> Agotado</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="producto-precio">
+                <span class="precio-actual">{{ producto.price }} Bs</span>
+                {% if producto.original_price %}
+                <span class="precio-anterior">{{ producto.original_price }} Bs</span>
+                <span class="descuento">-{{ producto.discount_percentage }}% OFF</span>
+                {% endif %}
+            </div>
+
+            <div class="producto-descripcion">
+                {{ producto.description|linebreaks }}
+            </div>
+
+            <form class="producto-compra" method="POST" action="{% url 'carrito:agregar_al_carrito' producto.id %}">
+                {% csrf_token %}
+                <div class="cantidad-selector">
+                    <button type="button" class="cantidad-btn menos" aria-label="Reducir cantidad">-</button>
+                    <input type="number" name="cantidad" value="1" min="1" max="{{ producto.stock }}" aria-label="Cantidad">
+                    <button type="button" class="cantidad-btn mas" aria-label="Aumentar cantidad">+</button>
+                </div>
+                
+                <div class="producto-acciones">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-shopping-cart"></i> Añadir al carrito
+                    </button>
+                    <button type="button" class="btn btn-wishlist">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="producto-detalles-adicionales">
+                <div class="caracteristica">
+                    <i class="fas fa-truck"></i>
+                    <div class="texto">
+                        <h3>Envío gratis</h3>
+                        <p>En pedidos superiores a 500 Bs</p>
+                    </div>
+                </div>
+                <div class="caracteristica">
+                    <i class="fas fa-undo"></i>
+                    <div class="texto">
+                        <h3>Devolución gratuita</h3>
+                        <p>30 días de garantía</p>
+                    </div>
+                </div>
+                <div class="caracteristica">
+                    <i class="fas fa-lock"></i>
+                    <div class="texto">
+                        <h3>Pago seguro</h3>
+                        <p>100% seguro</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if productos_relacionados %}
+    <section class="productos-relacionados">
+        <h2>Productos relacionados</h2>
+        <div class="productos-grid">
+            {% for prod_rel in productos_relacionados %}
+            <article class="producto-card">
+                <a href="{% url 'productos:producto' prod_rel.id %}" class="producto-link">
+                    <div class="img-producto">
+                        <img src="{{ prod_rel.image.url }}" alt="{{ prod_rel.name }}" loading="lazy">
+                    </div>
+                    <div class="producto-details">
+                        <h3>{{ prod_rel.name }}</h3>
+                        <div class="producto-precio">
+                            <span class="precio-actual">{{ prod_rel.price }} Bs</span>
+                        </div>
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/producto.js' %}"></script>
+{% endblock %}

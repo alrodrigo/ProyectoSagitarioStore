@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mi Perfil - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+<link rel="stylesheet" href="{% static 'css/buttons.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h1>Mi Perfil</h1>
+        <p>Bienvenido, {{ user.get_full_name|default:user.username }}</p>
+    </div>
+
+    <div class="profile-section">
+        <h2>Información Personal</h2>
+        <div class="profile-info">
+            <div class="info-item">
+                <label>Nombre</label>
+                <span>{{ user.first_name }}</span>
+            </div>
+            <div class="info-item">
+                <label>Apellido</label>
+                <span>{{ user.last_name }}</span>
+            </div>
+            <div class="info-item">
+                <label>Email</label>
+                <span>{{ user.email }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="{% url 'usuarios:password_reset' %}" class="btn btn-secondary">Cambiar Contraseña</a>
+        <form action="{% url 'usuarios:logout' %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Cerrar Sesión</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

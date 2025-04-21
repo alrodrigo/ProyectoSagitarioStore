@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta_description %}Resultados de búsqueda para "{{ query }}" - Sagitario Store{% endblock %}
+
+{% block title %}Búsqueda: {{ query }} - Sagitario Store{% endblock %}
+
+{% block content %}
+<div class="search-results">
+    <h1>Resultados de búsqueda para "{{ query }}"</h1>
+    
+    {% if productos %}
+        <div class="products-container">
+            {% for producto in productos %}
+            <article class="product-card">
+                <a href="{% url 'productos:producto' producto.id %}" class="product-link">
+                    <div class="img-product">
+                        <img src="{{ producto.image.url }}" alt="{{ producto.name }}" loading="lazy">
+                        <div class="product-overlay">
+                            <span class="quick-view-btn">Vista rápida</span>
+                        </div>
+                    </div>
+                    <div class="product-details">
+                        <h2 class="product-title">{{ producto.name }}</h2>
+                        <div class="product-price">
+                            <span class="current-price">{{ producto.price }} Bs</span>
+                            {% if producto.original_price %}
+                            <span class="original-price">{{ producto.original_price }} Bs</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                <div class="product-actions">
+                    <button class="add-to-cart-btn" aria-label="Añadir al carrito" data-product-id="{{ producto.id }}">
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                    <button class="wishlist-btn" aria-label="Añadir a favoritos" data-product-id="{{ producto.id }}">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+
+        {% if productos.has_other_pages %}
+        <div class="pagination">
+            {% if productos.has_previous %}
+            <a href="?q={{ query }}&page={{ productos.previous_page_number }}" class="pagination-btn prev">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+            
+            <div class="pagination-numbers">
+                {% for num in productos.paginator.page_range %}
+                    {% if num == productos.number %}
+                    <span class="page-number active">{{ num }}</span>
+                    {% else %}
+                    <a href="?q={{ query }}&page={{ num }}" class="page-number">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+            {% if productos.has_next %}
+            <a href="?q={{ query }}&page={{ productos.next_page_number }}" class="pagination-btn next">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="no-results">
+            <p>No se encontraron productos que coincidan con tu búsqueda.</p>
+            <p>Sugerencias:</p>
+            <ul>
+                <li>Revisa la ortografía de las palabras</li>
+                <li>Usa palabras más generales</li>
+                <li>Prueba con términos relacionados</li>
+            </ul>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sagitario Store{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    {% load static %}
+    {% block pre_common_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/notifications.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <header class="navbar">
+        <div class="navbar__container">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'images/logo.jpg' %}" alt="Logo de Sagitario Store" class="navbar__logo">
+            </a>
+            
+                <nav class="navbar__nav" id="navbarNav">
+                <a href="{% url 'home' %}" class="navbar__link">Inicio</a>
+                <div class="dropdown">
+                    <button class="dropdown__button">
+                        Categorías <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown__content">
+                        <a href="{% url 'productos:categoria' 'anime' %}" class="navbar__link">Anime</a>
+                        <a href="{% url 'productos:categoria' 'superheroes' %}" class="navbar__link">Superhéroes</a>
+                        <a href="#" class="navbar__link">Otros</a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="navbar__actions">
+                {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="dropdown__button">
+                            <i class="fas fa-user"></i> Mi Cuenta
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown__content">
+                            <a href="{% url 'usuarios:perfil' %}" class="navbar__link">
+                                <i class="fas fa-user-circle"></i> Mi Perfil
+                            </a>
+                            <form action="{% url 'usuarios:logout' %}" method="post" class="logout-form">
+                                {% csrf_token %}
+                                <button type="submit" class="navbar__link" style="background:none; border:none; width:100%; text-align:left; cursor:pointer;">
+                                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'usuarios:login' %}" class="navbar__link">Iniciar Sesión</a>
+                {% endif %}
+                
+                <!-- Quitar el load carrito_tags y usar JS para actualizar -->
+                <a href="{% url 'carrito:ver_carrito' %}" class="navbar__link" aria-label="Ver carrito">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+                
+                <!-- Mobile Menu Button (Uncomment and ensure icon path is correct) -->
+                <button class="mobile-menu" id="mobileMenuButton" aria-label="Abrir menú" aria-expanded="false" aria-controls="navbarNav">
+                    <img src="{% static 'icons/menu-icon.svg' %}" class="mobile-menu__icon" alt=""> 
+                    <!-- Or use FontAwesome: <i class="fas fa-bars mobile-menu__icon"></i> -->
+                </button> 
+                
+            </div>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="messages" id="messageContainer">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer">
+        <div class="container footer__content">
+            <div class="footer__section">
+                <h3 class="footer__title">Enlaces rápidos</h3>
+                <ul class="footer__list">
+                    <li class="footer__item"><a href="{% url 'home' %}" class="footer__link">Inicio</a></li>
+                    <li class="footer__item"><a href="{% url 'productos:categoria' 'anime' %}" class="footer__link">Figuras de Anime</a></li>
+                    <li class="footer__item"><a href="{% url 'productos:categoria' 'superheroes' %}" class="footer__link">Figuras de Superhéroes</a></li>
+                    {% if user.is_authenticated %}
+                        <li class="footer__item"><a href="{% url 'usuarios:perfil' %}" class="footer__link">Mi cuenta</a></li>
+                    {% else %}
+                        <li class="footer__item"><a href="{% url 'usuarios:login' %}" class="footer__link">Iniciar Sesión</a></li>
+                        <li class="footer__item"><a href="{% url 'usuarios:register' %}" class="footer__link">Crear Cuenta</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <div class="footer__section">
+                <h3 class="footer__title">Contáctanos</h3>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/sagitariostorebo" target="_blank" class="social-link">
+                        <img src="{% static 'icons/facebook.png' %}" alt="Facebook" class="social-link__icon">
+                        <span>Visita nuestra página de Facebook</span>
+                    </a>
+                    <a href="https://wa.me/59170000000" target="_blank" class="social-link">
+                        <img src="{% static 'icons/whatsapp.png' %}" alt="WhatsApp" class="social-link__icon">
+                        <span>Chatea en WhatsApp</span>
+                    </a>
+                    <a href="https://chat.whatsapp.com/group-link" target="_blank" class="social-link">
+                        <img src="{% static 'icons/whatsapp.png' %}" alt="WhatsApp Grupo" class="social-link__icon">
+                        <span>Únete a nuestro grupo de WhatsApp</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer__section">
+                <h3 class="footer__title">Ayuda</h3>
+                <ul class="footer__list">
+                    <li class="footer__item"><a href="#" class="footer__link">Preguntas frecuentes</a></li>
+                    <li class="footer__item"><a href="#" class="footer__link">Envíos y devoluciones</a></li>
+                    <li class="footer__item"><a href="#" class="footer__link">Términos y condiciones</a></li>
+                    <li class="footer__item"><a href="#" class="footer__link">Política de privacidad</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; {% now "Y" %} Sagitario Store. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Basic Mobile Nav Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuButton = document.getElementById('mobileMenuButton');
+            const navbarNav = document.getElementById('navbarNav');
+            
+            if (menuButton && navbarNav) {
+                menuButton.addEventListener('click', function() {
+                    navbarNav.classList.toggle('active');
+                    const isExpanded = navbarNav.classList.contains('active');
+                    menuButton.setAttribute('aria-expanded', isExpanded);
+                    // Optional: Change icon on toggle
+                    // const icon = menuButton.querySelector('.mobile-menu__icon');
+                    // if (isExpanded) { icon.classList.replace('fa-bars', 'fa-times'); } 
+                    // else { icon.classList.replace('fa-times', 'fa-bars'); }
+                });
+
+                // Close menu if clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!navbarNav.contains(event.target) && !menuButton.contains(event.target) && navbarNav.classList.contains('active')) {
+                        navbarNav.classList.remove('active');
+                        menuButton.setAttribute('aria-expanded', 'false');
+                        // Optional: Reset icon
+                        // const icon = menuButton.querySelector('.mobile-menu__icon');
+                        // icon.classList.replace('fa-times', 'fa-bars');
+                    }
+                });
+            }
+
+            // Handle mobile dropdown toggles if needed
+            const dropdownButtons = document.querySelectorAll('.navbar__nav .dropdown__button');
+            if (window.innerWidth <= 768) { // Only apply click toggle on mobile
+                dropdownButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        // Prevent hover effect from interfering
+                        if (window.innerWidth <= 768) {
+                             e.preventDefault(); // Prevent link navigation if button is a link
+                             const dropdown = this.closest('.dropdown');
+                             if (dropdown) {
+                                 dropdown.classList.toggle('open');
+                             }
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+    
+    <!-- Cart Utils Script -->
+    <script src="{% static 'js/cart-utils.js' %}"></script>
+    
+    <!-- Script para cerrar notificaciones manualmente -->
+    <script>
+        document.addEventListener('click', function(event) {
+            const alert = event.target.closest('.alert');
+            if (alert) {
+                alert.classList.add('fade-out');
+                setTimeout(() => {
+                    alert.remove();
+                }, 500);
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

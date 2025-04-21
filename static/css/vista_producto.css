@@ -1,0 +1,378 @@
+/* Styles for /home/rodrigo/Proyectotienda1/templates/productos/producto.html */
+
+/* Main container */
+.producto-detalle {
+    max-width: 1200px; /* Or your preferred max width */
+    margin: 2rem auto;
+    padding: 1rem; /* Add padding for smaller screens */
+    background-color: #fff; /* Optional: background for the whole section */
+    border-radius: 8px; /* Optional: rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Optional: subtle shadow */
+}
+
+/* Grid layout for images and info */
+.producto-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Stack on mobile */
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+    .producto-grid {
+        grid-template-columns: 1fr 1fr; /* Side-by-side on larger screens */
+        gap: 3rem;
+    }
+    .producto-detalle {
+        padding: 2rem; /* More padding on larger screens */
+    }
+}
+
+/* Image section */
+.producto-imagenes {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.imagen-principal img {
+    width: 100%;
+    max-width: 500px; /* Limit max image size */
+    height: auto;
+    display: block;
+    margin: 0 auto; /* Center image if container is wider */
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+}
+
+.miniaturas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center; /* Center thumbnails */
+}
+
+.miniatura {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.miniatura:hover {
+    border-color: var(--primary-light, #ccc); /* Use primary light color if defined */
+    transform: scale(1.05);
+}
+
+.miniatura.active {
+    border-color: var(--primary, #007bff); /* Use primary color if defined */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Info section */
+.producto-info {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+    margin-bottom: 1rem;
+}
+
+.breadcrumb ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted, #6c757d);
+}
+
+.breadcrumb li:not(:last-child)::after {
+    content: '/';
+    margin-left: 0.5rem;
+    color: var(--text-muted, #6c757d);
+}
+
+.breadcrumb a {
+    color: var(--primary, #007bff);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb li[aria-current="page"] {
+    font-weight: bold;
+    color: var(--text, #333);
+}
+
+
+/* Product Name */
+.producto-info h1 {
+    font-size: 1.8rem; /* Adjust as needed */
+    margin-bottom: 0.75rem;
+    color: var(--text-heading, #333);
+    line-height: 1.3;
+}
+
+@media (min-width: 768px) {
+    .producto-info h1 {
+        font-size: 2.2rem;
+    }
+}
+
+/* Meta info (Rating & Stock) */
+.producto-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rating .stars {
+    color: #f8c102; /* Gold color for stars */
+}
+
+.rating .review-count {
+    color: var(--text-muted, #6c757d);
+}
+
+.stock-info .disponible {
+    color: #28a745; /* Green */
+    font-weight: 500;
+}
+
+.stock-info .agotado {
+    color: #dc3545; /* Red */
+    font-weight: 500;
+}
+
+.stock-info i {
+    margin-right: 0.3rem;
+}
+
+/* Price */
+.producto-precio {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.precio-actual {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary, #007bff);
+}
+
+.precio-anterior {
+    font-size: 1.1rem;
+    color: var(--text-muted, #6c757d);
+    text-decoration: line-through;
+}
+
+.descuento {
+    background-color: var(--danger, #dc3545);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+/* Description */
+.producto-descripcion {
+    margin-bottom: 2rem;
+    color: var(--text-secondary, #555);
+    line-height: 1.6;
+}
+
+/* Purchase Form */
+.producto-compra {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 576px) {
+    .producto-compra {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+/* Quantity Selector */
+.cantidad-selector {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+    max-width: 120px; /* Limit width */
+}
+
+.cantidad-selector input[type="number"] {
+    width: 50px;
+    text-align: center;
+    border: none;
+    padding: 0.5rem 0;
+    font-size: 1rem;
+    /* Remove spinner arrows */
+    -moz-appearance: textfield;
+}
+.cantidad-selector input[type="number"]::-webkit-outer-spin-button,
+.cantidad-selector input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.cantidad-btn {
+    background-color: #f8f9fa;
+    border: none;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--text-muted, #6c757d);
+    transition: background-color 0.2s;
+}
+
+.cantidad-btn:hover {
+    background-color: #e9ecef;
+}
+
+.cantidad-btn.menos {
+    border-right: 1px solid #ccc;
+}
+
+.cantidad-btn.mas {
+    border-left: 1px solid #ccc;
+}
+
+/* Action Buttons */
+.producto-acciones {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Assuming .btn styles are defined globally in components.css */
+/* Add specific overrides if needed */
+.producto-acciones .btn {
+    padding: 0.75rem 1.2rem; /* Adjust padding if needed */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.producto-acciones .btn-primary {
+    /* Use global styles */
+}
+
+.producto-acciones .btn-wishlist {
+    background-color: transparent;
+    border: 1px solid var(--primary, #007bff);
+    color: var(--primary, #007bff);
+    padding: 0.65rem; /* Make it squarish */
+    line-height: 1;
+}
+
+.producto-acciones .btn-wishlist:hover {
+    background-color: var(--primary-light, #e7f3ff);
+}
+
+.producto-acciones .btn-wishlist i {
+    margin: 0; /* Remove gap if only icon */
+    font-size: 1.2rem;
+}
+
+
+/* Additional Details Section */
+.producto-detalles-adicionales {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: #f8f9fa; /* Light background */
+    border-radius: 8px;
+    margin-top: 1rem; /* Space from form */
+}
+
+.caracteristica {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.caracteristica i {
+    font-size: 1.8rem;
+    color: var(--primary, #007bff);
+    width: 30px; /* Fixed width for alignment */
+    text-align: center;
+}
+
+.caracteristica .texto h3 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    color: var(--text-heading, #333);
+}
+
+.caracteristica .texto p {
+    font-size: 0.85rem;
+    color: var(--text-muted, #6c757d);
+    margin: 0;
+}
+
+/* Related Products Section */
+.productos-relacionados {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+}
+
+.productos-relacionados h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.6rem;
+    color: var(--text-heading, #333);
+}
+
+/* Use the same grid as home, potentially adjust gaps or columns if needed */
+.productos-relacionados .productos-grid {
+    /* Inherits from global or home.css if defined */
+    /* Override if needed: */
+    /* grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); */
+    /* gap: 1.5rem; */
+    margin-bottom: 0; /* Remove bottom margin if it's the last element */
+}
+
+/* Style related product cards if they need to differ from main listings */
+.productos-relacionados .producto-card {
+    /* Inherits from global or products.css */
+    /* Example override: */
+    /* box-shadow: 0 1px 4px rgba(0,0,0,0.08); */
+}
+
+.productos-relacionados .producto-card h3 {
+    font-size: 0.95rem; /* Slightly smaller title */
+}
+
+.productos-relacionados .producto-precio .precio-actual {
+    font-size: 1rem; /* Slightly smaller price */
+}

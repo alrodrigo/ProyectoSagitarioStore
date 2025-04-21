@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Carrito de Compras - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">{# Cambiado de carrito.css a cart.css normalizado #}
+{% endblock %}
+
+{% block content %}
+<main class="container">
+    <h1>Carrito de Compras</h1>
+    
+    {% if productos %}
+        <div class="cart-items">
+            {% for item in productos %}
+                <div class="cart-item">
+                    <div class="item-image">
+                        {% if item.producto.image %}
+                            <img src="{{ item.producto.image.url }}" alt="{{ item.producto.name }}">
+                        {% else %}
+                            <img src="{% static 'images/no-image.png' %}" alt="Sin imagen">
+                        {% endif %}
+                    </div>
+                    <div class="item-details">
+                        <h3>{{ item.producto.name }}</h3>
+                        <p class="price">Precio: {{ item.producto.price }} Bs</p>
+                        <div class="quantity-controls">
+                            <form method="POST" action="{% url 'carrito:eliminar_del_carrito' item.producto.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">-</button>
+                            </form>
+                            <span class="quantity">{{ item.cantidad }}</span>
+                            <form method="POST" action="{% url 'carrito:agregar_al_carrito' item.producto.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-primary">+</button>
+                            </form>
+                        </div>
+                        <p class="subtotal">Subtotal: {{ item.subtotal }} Bs</p>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <div class="cart-summary">
+                <h3>Total: {{ total }} Bs</h3>
+                <div class="cart-actions">
+                    <form method="POST" action="{% url 'carrito:vaciar_carrito' %}" style="display: inline;" id="vaciarCarritoForm">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-danger" onclick="confirmarVaciarCarrito()">
+                            <i class="fas fa-trash-alt"></i> Vaciar carrito
+                        </button>
+                    </form>
+                    <a href="{% url 'productos:home' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Seguir comprando
+                    </a>
+                    <a href="{% url 'pedidos:checkout' %}" class="btn btn-success">
+                        <i class="fas fa-shopping-cart"></i> Proceder al pago
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-cart">
+            <p>Tu carrito está vacío</p>
+            <a href="{% url 'productos:home' %}" class="btn btn-primary">Continuar Comprando</a>
+        </div>
+    {% endif %}
+    
+    <!-- Modal de confirmación para vaciar carrito -->
+    <div class="modal" id="vaciarCarritoModal">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h2 class="modal__title">Confirmar acción</h2>
+                <button class="modal__close" onclick="cerrarModal()">&times;</button>
+            </div>
+            <div class="modal__body">
+                <p>¿Estás seguro de que quieres vaciar el carrito? Esta acción eliminará todos los productos.</p>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--secondary" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn btn--primary btn--danger" onclick="vaciarCarrito()">Vaciar carrito</button>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function confirmarVaciarCarrito() {
+        const modal = document.getElementById('vaciarCarritoModal');
+        modal.classList.add('show');
+    }
+    
+    function cerrarModal() {
+        const modal = document.getElementById('vaciarCarritoModal');
+        modal.classList.remove('show');
+    }
+    
+    function vaciarCarrito() {
+        document.getElementById('vaciarCarritoForm').submit();
+    }
+</script>
+{% endblock %}
