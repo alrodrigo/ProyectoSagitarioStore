@@ -1,0 +1,139 @@
+{% extends "pedidos/checkout/base_checkout.html" %}
+{% load static %}
+
+{% block title %}Envío y Pago - Proceso de Compra{% endblock %}
+
+{% block checkout_content %}
+<section class="checkout-section">
+    <h1>Envío y método de pago</h1>
+    
+    <div class="section-content">
+        <div class="checkout-address-recap">
+            <h2>Dirección de envío</h2>
+            <div class="address-summary">
+                <p><strong>{{ direccion.nombre_completo }}</strong></p>
+                <p>{{ direccion.direccion }}</p>
+                <p>{{ direccion.ciudad }}, {{ direccion.departamento }}{% if direccion.codigo_postal %} - {{ direccion.codigo_postal }}{% endif %}</p>
+                <p>Tel: {{ direccion.telefono }}</p>
+            </div>
+        </div>
+        
+        <form method="POST" action="{% url 'pedidos:checkout_paso2' %}">
+            {% csrf_token %}
+            
+            <div class="checkout-section-block">
+                <h2>Método de envío</h2>
+                <div class="shipping-options">
+                    {% for metodo in metodos_envio %}
+                    <div class="shipping-option">
+                        <label for="metodo_{{ metodo.id }}" class="shipping-option-card">
+                            <div class="option-radio">
+                                <input type="radio" name="metodo_envio" id="metodo_{{ metodo.id }}" value="{{ metodo.id }}" {% if forloop.first %}checked{% endif %} required>
+                                <div class="radio-indicator"></div>
+                            </div>
+                            <div class="option-details">
+                                <div class="option-name">{{ metodo.nombre }}</div>
+                                <div class="option-description">{{ metodo.descripcion }}</div>
+                                <div class="option-time">Entrega estimada: {{ metodo.tiempo_estimado }}</div>
+                            </div>
+                            <div class="option-price">{{ metodo.precio }} Bs</div>
+                        </label>
+                    </div>
+                    {% empty %}
+                    <p class="no-options">No hay métodos de envío disponibles en este momento.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="checkout-section-block">
+                <h2>Método de pago</h2>
+                <div class="payment-options">
+                    {% for value, label in pago_form.metodo_pago.field.choices %}
+                    <div class="payment-option">
+                        <label for="id_metodo_pago_{{ forloop.counter0 }}" class="payment-option-card">
+                            <div class="option-radio">
+                                <input type="radio" name="metodo_pago" id="id_metodo_pago_{{ forloop.counter0 }}" value="{{ value }}" {% if forloop.first %}checked{% endif %} required>
+                                <div class="radio-indicator"></div>
+                            </div>
+                            <div class="option-details">
+                                <div class="option-name">{{ label }}</div>
+                                <div class="option-description">
+                                    {% if value == 'transferencia' %}
+                                    Realiza una transferencia bancaria a nuestra cuenta. Te enviaremos los datos después de confirmar el pedido.
+                                    {% elif value == 'qr' %}
+                                    Escanea nuestro código QR para realizar el pago rápidamente.
+                                    {% elif value == 'efectivo' %}
+                                    Pago en efectivo al recibir el producto.
+                                    {% elif value == 'tarjeta' %}
+                                    Pago con tarjeta de crédito o débito.
+                                    {% elif value == 'tigo_money' %}
+                                    Pago a través de Tigo Money.
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="payment-icon">
+                                {% if value == 'transferencia' %}
+                                <i class="fas fa-university"></i>
+                                {% elif value == 'qr' %}
+                                <i class="fas fa-qrcode"></i>
+                                {% elif value == 'efectivo' %}
+                                <i class="fas fa-money-bill-wave"></i>
+                                {% elif value == 'tarjeta' %}
+                                <i class="fas fa-credit-card"></i>
+                                {% elif value == 'tigo_money' %}
+                                <i class="fas fa-mobile-alt"></i>
+                                {% endif %}
+                            </div>
+                        </label>
+                        
+                        {% if value == 'transferencia' or value == 'qr' %}
+                        <div class="payment-reference" id="reference-{{ value }}" style="display: none;">
+                            <div class="form-group">
+                                <label for="id_referencia_pago">Número de referencia/comprobante (opcional):</label>
+                                {{ pago_form.referencia_pago }}
+                                <small>Puedes añadirlo ahora o después de realizar el pago</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'pedidos:checkout_paso1' %}" class="btn btn-outline">Volver</a>
+                <button type="submit" class="btn btn-primary">Continuar</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mostrar el campo de referencia cuando se selecciona transferencia o QR
+        const paymentRadios = document.querySelectorAll('input[name="metodo_pago"]');
+        const referenceFields = document.querySelectorAll('.payment-reference');
+        
+        function toggleReferenceField() {
+            const selectedValue = document.querySelector('input[name="metodo_pago"]:checked').value;
+            
+            referenceFields.forEach(field => {
+                field.style.display = 'none';
+            });
+            
+            if (selectedValue === 'transferencia' || selectedValue === 'qr') {
+                document.querySelector('#reference-' + selectedValue).style.display = 'block';
+            }
+        }
+        
+        paymentRadios.forEach(radio => {
+            radio.addEventListener('change', toggleReferenceField);
+        });
+        
+        // Ejecutar una vez al cargar para mostrar el campo si corresponde
+        toggleReferenceField();
+    });
+</script>
+{% endblock %}

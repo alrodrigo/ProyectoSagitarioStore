@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mis Pedidos - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+<link rel="stylesheet" href="{% static 'css/order-tracking.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="container">
+    <section class="orders-section">
+        <div class="page-header">
+            <h1>Mis Pedidos</h1>
+            <p>Historial y seguimiento de tus compras</p>
+        </div>
+        
+        {% if pedidos %}
+            <div class="orders-list">
+                {% for pedido in pedidos %}
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-info">
+                            <div class="order-number">Pedido #{{ pedido.id }}</div>
+                            <div class="order-date">{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</div>
+                        </div>
+                        <div class="order-status status-{{ pedido.estado }}">
+                            {{ pedido.get_estado_display }}
+                        </div>
+                    </div>
+                    
+                    <div class="order-products">
+                        {% for item in pedido.items.all|slice:":3" %}
+                        <div class="order-product-thumbnail">
+                            <img src="{{ item.producto.image.url }}" alt="{{ item.producto.name }}">
+                        </div>
+                        {% endfor %}
+                        {% if pedido.items.count > 3 %}
+                        <div class="order-more-items">
+                            +{{ pedido.items.count|add:"-3" }} más
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="order-footer">
+                        <div class="order-total">
+                            Total: <strong>{{ pedido.total }} Bs</strong>
+                        </div>
+                        <div class="order-actions">
+                            <a href="{% url 'pedidos:detalle_pedido' pedido.id %}" class="btn btn-sm btn-primary">Ver detalles</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-orders">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <h2>No tienes pedidos aún</h2>
+                <p>Cuando realices compras, podrás ver y hacer seguimiento de tus pedidos aquí.</p>
+                <a href="{% url 'productos:home' %}" class="btn btn-primary">Ir a comprar</a>
+            </div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

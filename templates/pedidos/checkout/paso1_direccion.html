@@ -1,0 +1,146 @@
+{% extends "pedidos/checkout/base_checkout.html" %}
+{% load static %}
+
+{% block title %}Dirección de Envío - Proceso de Compra{% endblock %}
+
+{% block checkout_content %}
+<section class="checkout-section address-section">
+    <h1>Dirección de envío</h1>
+    
+    {% if direcciones %}
+    <div class="saved-addresses">
+        <h2>Direcciones guardadas</h2>
+        
+        <div class="addresses-list">
+            {% for direccion in direcciones %}
+            <div class="address-card {% if direccion.es_predeterminada %}default{% endif %}">
+                <div class="address-content">
+                    <h3>{{ direccion.nombre_completo }}</h3>
+                    <p class="address-details">
+                        {{ direccion.direccion }}<br>
+                        {{ direccion.ciudad }}, {{ direccion.departamento }}
+                        {% if direccion.codigo_postal %} - {{ direccion.codigo_postal }}{% endif %}<br>
+                        Tel: {{ direccion.telefono }}
+                    </p>
+                    {% if direccion.es_predeterminada %}
+                    <span class="address-badge">Predeterminada</span>
+                    {% endif %}
+                </div>
+                
+                <div class="address-actions">
+                    <form method="POST" action="{% url 'pedidos:checkout_paso1' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="direccion_id" value="{{ direccion.id }}">
+                        <button type="submit" class="btn btn-primary">Enviar a esta dirección</button>
+                    </form>
+                    <div class="address-links">
+                        <a href="{% url 'pedidos:editar_direccion' direccion.id %}?next=pedidos:checkout_paso1" class="address-edit">Editar</a>
+                        {% if not direccion.es_predeterminada %}
+                        <form method="POST" action="{% url 'pedidos:eliminar_direccion' direccion.id %}?next=pedidos:checkout_paso1" class="address-delete-form">
+                            {% csrf_token %}
+                            <button type="submit" class="address-delete" onclick="return confirm('¿Estás seguro de que deseas eliminar esta dirección?')">Eliminar</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="new-address">
+        <h2 class="divider-or">{% if direcciones %}O ingrese una nueva dirección{% else %}Nueva dirección{% endif %}</h2>
+        
+        <form method="POST" action="{% url 'pedidos:checkout_paso1' %}" class="address-form">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {% for error in form.non_field_errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.nombre_completo.id_for_label }}">Nombre completo*</label>
+                    {{ form.nombre_completo }}
+                    {% if form.nombre_completo.errors %}
+                    <div class="form-error">{{ form.nombre_completo.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.telefono.id_for_label }}">Teléfono*</label>
+                    {{ form.telefono }}
+                    {% if form.telefono.errors %}
+                    <div class="form-error">{{ form.telefono.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.direccion.id_for_label }}">Dirección*</label>
+                    {{ form.direccion }}
+                    {% if form.direccion.errors %}
+                    <div class="form-error">{{ form.direccion.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-row two-columns">
+                <div class="form-group">
+                    <label for="{{ form.ciudad.id_for_label }}">Ciudad*</label>
+                    {{ form.ciudad }}
+                    {% if form.ciudad.errors %}
+                    <div class="form-error">{{ form.ciudad.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.departamento.id_for_label }}">Departamento*</label>
+                    {{ form.departamento }}
+                    {% if form.departamento.errors %}
+                    <div class="form-error">{{ form.departamento.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.codigo_postal.id_for_label }}">Código Postal</label>
+                    {{ form.codigo_postal }}
+                    {% if form.codigo_postal.errors %}
+                    <div class="form-error">{{ form.codigo_postal.errors.0 }}</div>
+                    {% endif %}
+                    <div class="form-help">Opcional - Ayuda a una entrega más rápida</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group checkbox-group">
+                    {{ form.es_predeterminada }}
+                    <label for="{{ form.es_predeterminada.id_for_label }}">Establecer como dirección predeterminada</label>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group checkbox-group">
+                    {{ form.guardar_direccion }}
+                    <label for="{{ form.guardar_direccion.id_for_label }}">Guardar esta dirección para futuros pedidos</label>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'carrito:ver_carrito' %}" class="btn btn-outline">Volver al carrito</a>
+                <button type="submit" class="btn btn-primary">Continuar a envío</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

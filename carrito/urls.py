@@ -9,4 +9,5 @@ urlpatterns = [
     path('eliminar/<int:producto_id>/', views.eliminar_del_carrito, name='eliminar_del_carrito'),
     path('vaciar/', views.vaciar_carrito, name='vaciar_carrito'),
     path('count/', views.cart_count, name='cart_count'),
+    path('agregar-ajax/', views.agregar_ajax, name='agregar_ajax'),
 ]

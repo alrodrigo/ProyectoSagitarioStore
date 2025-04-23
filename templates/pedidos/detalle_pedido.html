@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pedido #{{ pedido.id }} - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+<link rel="stylesheet" href="{% static 'css/order-tracking.css' %}">
+<style>
+    /* Añadir estilos para mejorar visualización del estado actual */
+    .timeline-item.active .timeline-dot {
+        background-color: #4CAF50;
+        border: 2px solid #4CAF50;
+    }
+    .timeline-item.active .timeline-status {
+        font-weight: bold;
+        color: #4CAF50;
+    }
+    /* Asegurar que los estados anteriores se vean adecuadamente */
+    .timeline-dot {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="container">
+    <div class="order-detail-page">
+        <div class="page-header">
+            <div class="header-back">
+                <a href="{% url 'pedidos:mis_pedidos' %}" class="back-link"><i class="fas fa-arrow-left"></i> Volver a mis pedidos</a>
+            </div>
+            <h1>Pedido #{{ pedido.id }}</h1>
+            <div class="order-status-badge status-{{ pedido.estado }}">
+                {{ pedido.get_estado_display }}
+            </div>
+        </div>
+        
+        <div class="tracking-timeline">
+            <h2>Seguimiento del pedido</h2>
+            
+            <!-- Nueva barra de progreso visual -->
+            <div class="order-status-container">
+                <div class="order-progress">
+                    <!-- Usamos directamente el estado del pedido para establecer el ancho -->
+                    <div class="progress-completed 
+                        {% if pedido.estado == 'pendiente' %}progress-width-0
+                        {% elif pedido.estado == 'pagado' %}progress-width-25
+                        {% elif pedido.estado == 'en_preparacion' %}progress-width-50
+                        {% elif pedido.estado == 'enviado' %}progress-width-75
+                        {% elif pedido.estado == 'entregado' or pedido.estado == 'cancelado' %}progress-width-100
+                        {% else %}progress-width-0{% endif %}">
+                    </div>
+                    <div class="progress-steps">
+                        <!-- Paso 1: Pendiente -->
+                        <div class="progress-step 
+                            {% if pedido.estado == 'pendiente' %}step-active
+                            {% elif pedido.estado == 'pagado' or pedido.estado == 'en_preparacion' or pedido.estado == 'enviado' or pedido.estado == 'entregado' %}step-completed
+                            {% endif %}">
+                            <div class="step-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="step-label">Pendiente</div>
+                        </div>
+                        
+                        <!-- Paso 2: Pagado -->
+                        <div class="progress-step 
+                            {% if pedido.estado == 'pagado' %}step-active
+                            {% elif pedido.estado == 'en_preparacion' or pedido.estado == 'enviado' or pedido.estado == 'entregado' %}step-completed
+                            {% endif %}">
+                            <div class="step-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="step-label">Pagado</div>
+                        </div>
+                        
+                        <!-- Paso 3: En preparación -->
+                        <div class="progress-step 
+                            {% if pedido.estado == 'en_preparacion' %}step-active
+                            {% elif pedido.estado == 'enviado' or pedido.estado == 'entregado' %}step-completed
+                            {% endif %}">
+                            <div class="step-icon">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                            <div class="step-label">Preparación</div>
+                        </div>
+                        
+                        <!-- Paso 4: Enviado -->
+                        <div class="progress-step 
+                            {% if pedido.estado == 'enviado' %}step-active
+                            {% elif pedido.estado == 'entregado' %}step-completed
+                            {% endif %}">
+                            <div class="step-icon">
+                                <i class="fas fa-shipping-fast"></i>
+                            </div>
+                            <div class="step-label">Enviado</div>
+                        </div>
+                        
+                        <!-- Paso 5: Entregado -->
+                        <div class="progress-step 
+                            {% if pedido.estado == 'entregado' %}step-active
+                            {% elif pedido.estado == 'cancelado' %}step-failed
+                            {% endif %}">
+                            <div class="step-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="step-label">Entregado</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mostrar estado del pago si existe un pago asociado -->
+                {% if pedido.pago %}
+                <div class="payment-status status-{{ pedido.pago.estado }}">
+                    <div class="status-indicator"></div>
+                    <div class="status-text">
+                        <strong>Estado del pago:</strong> {{ pedido.pago.get_estado_display }}
+                        {% if pedido.pago.estado == 'pendiente' or pedido.pago.estado == 'procesando' %}
+                        - Estamos esperando la confirmación de tu pago
+                        {% elif pedido.pago.estado == 'completado' %}
+                        - Tu pago ha sido confirmado
+                        {% elif pedido.pago.estado == 'fallido' %}
+                        - Hubo un problema con tu pago
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Timeline mejorado: muestra primero el más reciente y lo marca como activo -->
+            <div class="timeline">
+                {% for seguimiento in seguimientos %}
+                <div class="timeline-item {% if forloop.first %}active{% endif %}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">{{ seguimiento.fecha|date:"d/m/Y H:i" }}</div>
+                        <div class="timeline-status">{{ seguimiento.get_estado_display }}</div>
+                        <div class="timeline-description">{{ seguimiento.descripcion }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <!-- Si no hay registros de seguimiento, mostrar al menos uno con el estado actual -->
+                <div class="timeline-item active">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">{% now "d/m/Y H:i" %}</div>
+                        <div class="timeline-status">{{ pedido.get_estado_display }}</div>
+                        <div class="timeline-description">
+                            {% if pedido.estado == 'pendiente' %}
+                                Pedido creado y pendiente de pago.
+                            {% elif pedido.estado == 'pagado' %}
+                                Pago del pedido confirmado.
+                            {% elif pedido.estado == 'en_preparacion' %}
+                                El pedido está siendo preparado.
+                            {% elif pedido.estado == 'enviado' %}
+                                Pedido enviado a la dirección de destino.
+                            {% elif pedido.estado == 'entregado' %}
+                                Pedido entregado correctamente.
+                            {% elif pedido.estado == 'cancelado' %}
+                                Pedido cancelado.
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="order-detail-info">
+            <div class="order-detail-card">
+                <h2>Información del pedido</h2>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Número de pedido:</span>
+                        <span class="detail-value">#{{ pedido.id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha:</span>
+                        <span class="detail-value">{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estado:</span>
+                        <span class="detail-value status-text-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Método de pago:</span>
+                        <span class="detail-value">{{ pedido.get_metodo_pago_display }}</span>
+                    </div>
+                    {% if pedido.referencia_pago %}
+                    <div class="detail-item">
+                        <span class="detail-label">Referencia de pago:</span>
+                        <span class="detail-value">{{ pedido.referencia_pago }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if pedido.estado == 'pendiente' and pedido.metodo_pago in 'transferencia,qr' %}
+                <div class="payment-reminder">
+                    <div class="reminder-icon"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="reminder-text">
+                        <p><strong>Pago pendiente</strong></p>
+                        <p>Recuerda realizar el pago para que podamos procesar tu pedido.</p>
+                        <button class="btn btn-primary btn-sm payment-instructions" data-pedido="{{ pedido.id }}">
+                            Ver instrucciones de pago
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="order-detail-cards">
+                <div class="order-detail-card address-card">
+                    <h2>Dirección de envío</h2>
+                    <div class="address-content">
+                        <p><strong>{{ pedido.direccion_envio.nombre_completo }}</strong></p>
+                        <p>{{ pedido.direccion_envio.direccion }}</p>
+                        <p>{{ pedido.direccion_envio.ciudad }}, {{ pedido.direccion_envio.departamento }}
+                        {% if pedido.direccion_envio.codigo_postal %} - {{ pedido.direccion_envio.codigo_postal }}{% endif %}</p>
+                        <p>Tel: {{ pedido.direccion_envio.telefono }}</p>
+                    </div>
+                </div>
+                
+                <div class="order-detail-card shipping-card">
+                    <h2>Método de envío</h2>
+                    <div class="shipping-content">
+                        <p><strong>{{ pedido.metodo_envio.nombre }}</strong></p>
+                        <p>{{ pedido.metodo_envio.descripcion }}</p>
+                        <p>Tiempo estimado: {{ pedido.metodo_envio.tiempo_estimado }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="order-detail-products">
+            <h2>Productos</h2>
+            <div class="detail-products-list">
+                {% for item in items %}
+                <div class="detail-product-item">
+                    <div class="product-image">
+                        <img src="{{ item.producto.image.url }}" alt="{{ item.producto.name }}">
+                    </div>
+                    <div class="product-info">
+                        <h3>{{ item.producto.name }}</h3>
+                        <p class="product-quantity">Cantidad: {{ item.cantidad }}</p>
+                    </div>
+                    <div class="product-pricing">
+                        <div class="product-unit-price">{{ item.precio }} Bs</div>
+                        <div class="product-total-price">{{ item.subtotal }} Bs</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="order-detail-totals">
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span>{{ pedido.subtotal }} Bs</span>
+                </div>
+                <div class="total-row">
+                    <span>Envío</span>
+                    <span>{{ pedido.costo_envio }} Bs</span>
+                </div>
+                <div class="total-row final">
+                    <span>Total</span>
+                    <span>{{ pedido.total }} Bs</span>
+                </div>
+            </div>
+        </div>
+        
+        {% if pedido.notas %}
+        <div class="order-detail-notes">
+            <h2>Notas del pedido</h2>
+            <div class="notes-content">
+                {{ pedido.notas }}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="order-detail-actions">
+            <a href="{% url 'pedidos:mis_pedidos' %}" class="btn btn-outline">Volver a mis pedidos</a>
+            
+            {% if pedido.estado == 'pendiente' %}
+            <a href="#" class="btn btn-primary">Contactar con soporte</a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Modal de instrucciones de pago -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Instrucciones de pago</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body" id="paymentInfo">
+                <!-- Contenido dinámico -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary close-modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Refrescar la página cada vez que el usuario vuelve a ella desde el historial del navegador
+        window.addEventListener('pageshow', function(event) {
+            // Si el evento persisted es true, el usuario ha navegado usando el botón atrás/adelante
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
+        // Funcionalidad para el modal de instrucciones de pago
+        const modal = document.getElementById('paymentModal');
+        const paymentInfo = document.getElementById('paymentInfo');
+        const paymentButtons = document.querySelectorAll('.payment-instructions');
+        
+        paymentButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const pedidoId = this.getAttribute('data-pedido');
+                // En un caso real, podrías cargar esta información mediante Ajax
+                // Para este ejemplo, mostraremos información estática
+                
+                let paymentHTML = `
+                    <p>Para completar tu pedido #${pedidoId}, realiza una transferencia a la siguiente cuenta:</p>
+                    <div class="bank-info">
+                        <p><strong>Banco:</strong> Banco de Crédito BCP</p>
+                        <p><strong>Número de cuenta:</strong> 123-456789</p>
+                        <p><strong>A nombre de:</strong> Sagitario Store</p>
+                    </div>
+                    <p>Una vez realizado el pago, envía el comprobante al WhatsApp: <a href="https://wa.me/59170000000">+591 70000000</a></p>
+                `;
+                
+                paymentInfo.innerHTML = paymentHTML;
+                modal.style.display = 'block';
+            });
+        });
+        
+        // Cerrar el modal
+        const closeButtons = document.querySelectorAll('.close-modal');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+        });
+        
+        // Cerrar al hacer clic fuera del modal
+        window.addEventListener('click', function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

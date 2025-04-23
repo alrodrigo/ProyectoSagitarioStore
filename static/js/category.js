@@ -115,4 +115,101 @@ document.addEventListener('DOMContentLoaded', function() {
             sortSelect.value = sortParam;
         }
     }
+    
+    // Funcionalidad para añadir productos al carrito mediante AJAX
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn:not(.disabled)');
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Evita que el evento se propague al enlace padre
+            
+            const productId = this.getAttribute('data-product-id');
+            if (!productId) return;
+            
+            // Botón visual de carga
+            const originalHTML = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            this.disabled = true;
+            
+            // Datos para la petición AJAX
+            const formData = new FormData();
+            formData.append('product_id', productId);
+            formData.append('quantity', 1); // Por defecto añadimos 1 unidad
+            
+            // Realizar petición AJAX
+            fetch('/carrito/agregar-ajax/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Restaurar botón
+                this.innerHTML = originalHTML;
+                this.disabled = false;
+                
+                if (data.success) {
+                    showNotification('<i class="fas fa-check-circle"></i> Producto añadido al carrito', 'success');
+                    
+                    // Actualizar contador del carrito en el navbar si existe
+                    const cartCountElement = document.querySelector('.cart-count');
+                    if (cartCountElement && data.cart_count !== undefined) {
+                        cartCountElement.textContent = data.cart_count;
+                    }
+                } else {
+                    showNotification('<i class="fas fa-exclamation-circle"></i> ' + (data.error || 'Error al añadir al carrito'), 'error');
+                }
+            })
+            .catch(error => {
+                // Restaurar botón
+                this.innerHTML = originalHTML;
+                this.disabled = false;
+                
+                console.error('Error:', error);
+                showNotification('<i class="fas fa-exclamation-circle"></i> Error de conexión', 'error');
+            });
+        });
+    });
+    
+    // Función para mostrar notificaciones
+    function showNotification(message, type) {
+        // Crear elemento de notificación
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = message;
+        
+        // Añadir al DOM
+        document.body.appendChild(notification);
+        
+        // Mostrar notificación con animación
+        setTimeout(() => {
+            notification.classList.add('show');
+            
+            // Ocultar después de un tiempo
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }, 100);
+    }
+    
+    // Función para obtener cookies (CSRF token)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 });

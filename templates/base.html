@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{% static 'css/common.css' %}">
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
     <link rel="stylesheet" href="{% static 'css/notifications.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ajax-notifications.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -44,6 +45,12 @@
                         <div class="dropdown__content">
                             <a href="{% url 'usuarios:perfil' %}" class="navbar__link">
                                 <i class="fas fa-user-circle"></i> Mi Perfil
+                            </a>
+                            <a href="{% url 'pedidos:mis_pedidos' %}" class="navbar__link">
+                                <i class="fas fa-box-open"></i> Mis Pedidos
+                                {% if pending_orders_count > 0 %}
+                                <span class="badge badge-notification">{{ pending_orders_count }}</span>
+                                {% endif %}
                             </a>
                             <form action="{% url 'usuarios:logout' %}" method="post" class="logout-form">
                                 {% csrf_token %}

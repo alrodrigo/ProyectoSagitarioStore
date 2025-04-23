@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Proceso de Compra - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="container checkout-container">
+    <!-- Progress bar -->
+    <div class="checkout-progress">
+        <div class="progress-step {% if request.resolver_match.url_name == 'checkout_paso1' or not request.resolver_match.url_name %}active{% elif request.resolver_match.url_name == 'checkout_paso2' or request.resolver_match.url_name == 'checkout_paso3' %}completed{% endif %}">
+            <div class="step-number">1</div>
+            <div class="step-title">Dirección</div>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step {% if request.resolver_match.url_name == 'checkout_paso2' %}active{% elif request.resolver_match.url_name == 'checkout_paso3' %}completed{% endif %}">
+            <div class="step-number">2</div>
+            <div class="step-title">Envío y Pago</div>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step {% if request.resolver_match.url_name == 'checkout_paso3' %}active{% endif %}">
+            <div class="step-number">3</div>
+            <div class="step-title">Confirmación</div>
+        </div>
+    </div>
+    
+    <div class="checkout-main">
+        <!-- Main checkout content -->
+        <div class="checkout-form">
+            {% block checkout_content %}
+            {% endblock %}
+        </div>
+        
+        <!-- Order summary -->
+        <div class="checkout-summary">
+            <div class="summary-header">
+                <h2>Resumen del pedido</h2>
+            </div>
+            
+            <div class="summary-products">
+                {% for item in cart_items %}
+                <div class="summary-product">
+                    <div class="product-image">
+                        {% if item.producto.image %}
+                        <img src="{{ item.producto.image.url }}" alt="{{ item.producto.name }}">
+                        {% else %}
+                        <img src="{% static 'images/no-image.png' %}" alt="{{ item.producto.name }}">
+                        {% endif %}
+                        <span class="item-qty">{{ item.cantidad }}</span>
+                    </div>
+                    <div class="product-info">
+                        <h3>{{ item.producto.name }}</h3>
+                        <div class="product-price">{{ item.subtotal }} Bs</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-cart">
+                    <p>No hay productos en tu carrito</p>
+                    <a href="{% url 'productos:lista' %}" class="btn btn-outline">Ir a la tienda</a>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="summary-totals">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>{{ subtotal|default:total }} Bs</span>
+                </div>
+                <div class="summary-row">
+                    <span>Envío</span>
+                    {% if costo_envio %}
+                        <span>{{ costo_envio }} Bs</span>
+                    {% elif request.resolver_match.url_name == 'checkout_paso1' %}
+                        <span>Por calcular</span>
+                    {% else %}
+                        <span>0 Bs</span>
+                    {% endif %}
+                </div>
+                {% if descuento %}
+                <div class="summary-row discount">
+                    <span>Descuento</span>
+                    <span>-{{ descuento }} Bs</span>
+                </div>
+                {% endif %}
+                <div class="summary-row total">
+                    <span>Total</span>
+                    {% if costo_envio %}
+                        <span>{{ total }} Bs</span>
+                    {% else %}
+                        <span>{{ subtotal|default:total }} Bs</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="promo-code">
+                <details>
+                    <summary>¿Tienes un código promocional?</summary>
+                    <div class="promo-form">
+                        <p>Funcionalidad de cupones próximamente.</p>
+                        <!-- 
+                        Para implementar en el futuro:
+                        <form class="promo-form" method="post" action="/pedidos/cupon/aplicar/">
+                            {% csrf_token %}
+                            <input type="text" name="cupon_codigo" placeholder="Ingresa tu código" class="form-input">
+                            <button type="submit" class="btn btn-sm">Aplicar</button>
+                        </form>
+                        -->
+                    </div>
+                </details>
+            </div>
+            
+            <div class="support-info">
+                <h3>¿Necesitas ayuda?</h3>
+                <p><i class="fas fa-phone"></i> <a href="tel:+59171234567">+591 71234567</a></p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:info@sagitariostore.com">info@sagitariostore.com</a></p>
+                <div class="support-links">
+                    <a href="#">Preguntas frecuentes</a>
+                    <a href="#">Envíos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Scripts comunes para el proceso de checkout
+});
+</script>
+{% endblock %}

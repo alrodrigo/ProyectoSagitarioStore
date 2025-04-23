@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from productos.views import home
+from .views import terms_view, privacy_policy_view
 
 urlpatterns = [
     path('', home, name='home'),  # URL directa para la página principal
@@ -27,6 +28,8 @@ urlpatterns = [
     path('usuarios/', include('usuarios.urls')),
     path('pedidos/', include('pedidos.urls')),
     path('carrito/', include('carrito.urls')),  # Agregando las URLs del carrito
+    path('terminos-y-condiciones/', terms_view, name='terms'),  # URL para términos y condiciones
+    path('politica-de-privacidad/', privacy_policy_view, name='privacy'),  # URL para política de privacidad
 ]
 
 # Agregar configuración para servir archivos multimedia en desarrollo

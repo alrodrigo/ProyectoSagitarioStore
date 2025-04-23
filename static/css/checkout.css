@@ -11,12 +11,9 @@ h1 {
 }
 
 .checkout-container {
-    display: flex;
-    gap: 2rem;
-    background: white;
-    border-radius: 10px;
-    box-shadow: var(--shadow);
-    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
 }
 
 .checkout-form {
@@ -149,4 +146,1285 @@ select:focus {
     .btn {
         width: 100%;
     }
+}
+
+/* Estilos para el proceso de checkout */
+
+/* Contenedor principal */
+.checkout-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* Barra de progreso */
+.checkout-progress {
+    margin-bottom: 2rem;
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 100px;
+    text-align: center;
+}
+
+.step-number {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #555;
+    border: 2px solid #e0e0e0;
+}
+
+.step.active .step-number {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.step-title {
+    font-size: 0.9rem;
+    color: #555;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+
+.step.active .step-title {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.step-edit {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.step-line {
+    flex: 1;
+    height: 3px;
+    background-color: #e0e0e0;
+    margin: 0 10px;
+    position: relative;
+    top: -17.5px;
+}
+
+/* Layout principal del checkout */
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+}
+
+@media (max-width: 992px) {
+    .checkout-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Zona principal del formulario */
+.checkout-main {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+}
+
+.checkout-section h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.8rem;
+}
+
+.checkout-section h2 {
+    font-size: 1.2rem;
+    margin: 1.5rem 0 1rem;
+    color: #444;
+}
+
+/* Direcciones guardadas */
+.address-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.address-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    display: flex;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+}
+
+.address-card:hover {
+    border-color: var(--primary-color);
+    background-color: #f3f3f3;
+}
+
+.address-radio {
+    margin-right: 1rem;
+    display: flex;
+    align-items: flex-start;
+}
+
+.address-radio input[type="radio"] {
+    margin-top: 5px;
+}
+
+.address-details {
+    flex: 1;
+}
+
+.badge-default {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.address-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.toggle-form {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+/* Formulario de nueva dirección */
+.new-address-form {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    border: 1px solid #eee;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #444;
+}
+
+.form-input,
+input[type="text"],
+input[type="tel"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+}
+
+.form-checkbox input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-error {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+.form-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+/* Opciones de envío */
+.checkout-address-recap {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.shipping-options,
+.payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.shipping-option-card,
+.payment-option-card {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shipping-option-card:hover,
+.payment-option-card:hover {
+    border-color: var(--primary-color);
+    background-color: #f5f5f5;
+}
+
+.option-radio {
+    margin-right: 1rem;
+    position: relative;
+}
+
+.option-details {
+    flex: 1;
+}
+
+.option-name {
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+
+.option-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.3rem;
+}
+
+.option-time {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.option-price {
+    font-weight: bold;
+}
+
+.payment-icon {
+    font-size: 1.5rem;
+    color: #555;
+    margin-left: 1rem;
+}
+
+.payment-reference {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-color);
+}
+
+/* Resumen de compra */
+.checkout-summary {
+    position: sticky;
+    top: 100px;
+}
+
+.summary-box {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.summary-box h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1.2rem;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.summary-items {
+    margin-bottom: 1.5rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.item-info {
+    display: flex;
+    align-items: center;
+}
+
+.item-quantity {
+    margin-right: 0.5rem;
+    color: #777;
+}
+
+.item-name {
+    font-size: 0.95rem;
+}
+
+.item-price {
+    font-weight: 500;
+}
+
+.summary-totals {
+    margin-top: 1.5rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+.summary-row.total {
+    border-top: 1px solid #ddd;
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* Insignias de confianza */
+.trust-badges {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.badge i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.badge span {
+    font-size: 0.8rem;
+    color: #555;
+}
+
+/* Estilos para revisión y confirmación */
+.order-block {
+    margin-bottom: 2rem;
+}
+
+.detail-card {
+    display: flex;
+    justify-content: space-between;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.detail-content {
+    flex: 1;
+}
+
+.detail-content p {
+    margin: 0.3rem 0;
+}
+
+.detail-edit {
+    color: var(--primary-color);
+    text-decoration: none;
+    align-self: flex-start;
+}
+
+.order-items {
+    border: 1px solid #eee;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.order-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.item-image img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.item-details h3 {
+    margin: 0 0 0.3rem;
+    font-size: 1rem;
+}
+
+.order-totals-block {
+    margin-top: 1.5rem;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.order-totals {
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+}
+
+.total-row.final-total {
+    font-weight: bold;
+    font-size: 1.1rem;
+    border-top: 1px solid #ddd;
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+}
+
+.order-notes {
+    margin-top: 2rem;
+}
+
+.order-notes textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.terms-checkbox {
+    margin: 2rem 0;
+    display: flex;
+    align-items: flex-start;
+}
+
+.terms-checkbox input {
+    margin-top: 0.3rem;
+    margin-right: 0.5rem;
+}
+
+/* Estilos para la página de confirmación de pedido */
+.confirmation-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.confirmation-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.confirmation-icon {
+    font-size: 3rem;
+    color: #4CAF50;
+    margin-bottom: 1rem;
+}
+
+.confirmation-message {
+    color: #555;
+    margin-bottom: 1rem;
+}
+
+.order-number {
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.confirmation-summary {
+    margin-bottom: 2rem;
+}
+
+.summary-block {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.summary-blocks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .summary-blocks {
+        grid-template-columns: 1fr;
+    }
+}
+
+.confirmation-items {
+    margin-top: 1rem;
+}
+
+.confirmation-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.confirmation-item:last-child {
+    border-bottom: none;
+}
+
+.confirmation-totals {
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-top: 1.5rem;
+}
+
+.total-row.total-final {
+    font-weight: bold;
+    font-size: 1.1rem;
+    border-top: 1px solid #ddd;
+    padding-top: 1rem;
+}
+
+.confirmation-info {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.next-steps {
+    padding-left: 1.5rem;
+}
+
+.next-steps li {
+    margin-bottom: 0.75rem;
+}
+
+.confirmation-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* Estilos para checkout paso 1 - Dirección */
+.checkout-section h1 {
+    font-size: 24px;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.checkout-section h2 {
+    font-size: 18px;
+    margin-bottom: 1rem;
+    color: #444;
+}
+
+.saved-addresses {
+    margin-bottom: 2rem;
+}
+
+.address-cards {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.address-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.address-card:hover {
+    border-color: #bbbbbb;
+}
+
+.address-radio {
+    margin-right: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.address-radio input[type="radio"] {
+    width: 18px;
+    height: 18px;
+}
+
+.address-details {
+    flex-grow: 1;
+}
+
+.address-details p {
+    margin: 0.5rem 0;
+    color: #666;
+}
+
+.badge-default {
+    display: inline-block;
+    background-color: #e8f5e9;
+    color: #388e3c;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.address-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.toggle-form {
+    color: #2196F3;
+    text-decoration: none;
+}
+
+.toggle-form:hover {
+    text-decoration: underline;
+}
+
+.new-address-form {
+    background-color: #fff;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #2196F3;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.form-checkbox input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+
+.form-error {
+    color: #f44336;
+    font-size: 14px;
+    margin-top: 0.25rem;
+}
+
+/* Estilos para checkout paso 2 - Envío y Pago */
+.delivery-address {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.address-summary {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn-change {
+    color: #2196F3;
+    text-decoration: none;
+    font-size: 14px;
+    align-self: flex-start;
+}
+
+.btn-change:hover {
+    text-decoration: underline;
+}
+
+.shipping-options,
+.payment-options {
+    margin-bottom: 2rem;
+}
+
+.radio-cards {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.radio-card {
+    position: relative;
+}
+
+.radio-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-card-label {
+    display: block;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.radio-card input[type="radio"]:checked + .radio-card-label {
+    border-color: #4CAF50;
+    background-color: #f1f8e9;
+}
+
+.radio-card-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.radio-card-heading h3 {
+    font-size: 16px;
+    margin: 0;
+}
+
+.radio-card-heading .price,
+.radio-card-heading i {
+    font-weight: 500;
+    color: #555;
+}
+
+.delivery-time {
+    color: #666;
+    font-size: 14px;
+    margin: 0.5rem 0;
+}
+
+.description {
+    color: #777;
+    font-size: 14px;
+}
+
+.payment-instructions {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f1f8e9;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.qr-code {
+    display: block;
+    max-width: 200px;
+    margin: 1rem auto;
+}
+
+.card-icons i {
+    font-size: 24px;
+    margin-right: 0.5rem;
+    color: #555;
+}
+
+.payment-reference {
+    margin-top: 1.5rem;
+}
+
+.form-help {
+    color: #757575;
+    font-size: 12px;
+    margin-top: 0.25rem;
+}
+
+.checkout-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* Estilos para checkout paso 3 - Confirmación */
+.order-review {
+    background-color: #fff;
+}
+
+.section-review {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+}
+
+.section-summary {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.shipping-summary .details {
+    flex-grow: 1;
+}
+
+.shipping-summary .price {
+    font-weight: 500;
+}
+
+.products-list {
+    margin-top: 1rem;
+}
+
+.product-item {
+    display: flex;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    margin-right: 1rem;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-details {
+    flex-grow: 1;
+}
+
+.product-details h3 {
+    font-size: 16px;
+    margin: 0 0 0.5rem;
+}
+
+.product-price {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 0.5rem;
+}
+
+.product-quantity {
+    font-size: 14px;
+    color: #666;
+}
+
+.product-subtotal {
+    font-weight: 500;
+    align-self: center;
+}
+
+.order-totals {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.totals-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.totals-row.total {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e0e0e0;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.confirm-box {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+}
+
+.terms-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.terms-check input {
+    margin-right: 0.75rem;
+}
+
+.terms-check a {
+    color: #2196F3;
+    text-decoration: none;
+}
+
+.terms-check a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos para página de confirmación de pedido */
+.confirmation-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.confirmation-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.confirmation-header {
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+}
+
+.confirmation-header.success {
+    background-color: #e8f5e9;
+}
+
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    background-color: #4CAF50;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-circle i {
+    color: white;
+    font-size: 40px;
+}
+
+.confirmation-header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.order-number {
+    margin-top: 0.5rem;
+    color: #666;
+    font-size: 16px;
+}
+
+.confirmation-content {
+    padding: 2rem;
+}
+
+.thank-you {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 2rem;
+    color: #444;
+}
+
+.order-info {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.info-label {
+    color: #666;
+}
+
+.info-value {
+    font-weight: 500;
+}
+
+.info-value.total {
+    font-weight: bold;
+    font-size: 18px;
+    color: #4CAF50;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-badge.pendiente {
+    background-color: #fff8e1;
+    color: #ffa000;
+}
+
+.status-badge.pagado {
+    background-color: #e1f5fe;
+    color: #0288d1;
+}
+
+.status-badge.en_preparacion {
+    background-color: #e8f5e9;
+    color: #388e3c;
+}
+
+.status-badge.enviado {
+    background-color: #ede7f6;
+    color: #7b1fa2;
+}
+
+.status-badge.entregado {
+    background-color: #e8f5e9;
+    color: #388e3c;
+}
+
+.status-badge.cancelado {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.payment-instructions {
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.payment-instructions h3 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.bank-info {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 6px;
+    border: 1px dashed #ccc;
+}
+
+.qr-container {
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.order-items {
+    margin: 1.5rem 0;
+}
+
+.order-items-header {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    font-weight: 500;
+    color: #666;
+}
+
+.order-item {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.order-summary {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.confirmation-actions {
+    padding: 1.5rem 2rem;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .checkout-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .checkout-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .checkout-actions .btn {
+        width: 100%;
+    }
+    
+    .order-items-header,
+    .order-item {
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+}
+
+/* Botones */
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 16px;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #388e3c;
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px solid #e0e0e0;
+    color: #555;
+}
+
+.btn-outline:hover {
+    background-color: #f5f5f5;
+}
+
+.btn-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #388e3c;
+}
+
+.btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
 }

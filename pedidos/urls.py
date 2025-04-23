@@ -4,7 +4,21 @@ from . import views
 app_name = 'pedidos'
 
 urlpatterns = [
-    path('cart/', views.carrito_view, name='cart'),
-    path('checkout/', views.checkout_view, name='checkout'),
-    path('orders/', views.mis_pedidos_view, name='orders'),
+    # URLs del proceso de checkout
+    path('checkout/direccion/', views.checkout_paso1, name='checkout_paso1'),
+    path('checkout/envio/', views.checkout_paso2, name='checkout_paso2'),
+    path('checkout/confirmacion/', views.checkout_paso3, name='checkout_paso3'),
+    path('checkout/completado/<int:pedido_id>/', views.confirmacion_pedido, name='confirmacion_pedido'),
+    
+    # URLs de gestión de pedidos
+    path('mis-pedidos/', views.mis_pedidos, name='mis_pedidos'),
+    path('mis-pedidos/<int:pedido_id>/', views.detalle_pedido, name='detalle_pedido'),
+    
+    # URLs para gestión de direcciones
+    path('direcciones/<int:direccion_id>/editar/', views.editar_direccion, name='editar_direccion'),
+    path('direcciones/<int:direccion_id>/eliminar/', views.eliminar_direccion, name='eliminar_direccion'),
+    
+    # URLs para gestión de pagos
+    path('pagos/<int:pago_id>/subir-comprobante/', views.subir_comprobante, name='subir_comprobante'),
+    path('verificar-pago/<int:pedido_id>/', views.verificar_pago, name='verificar_pago'),
 ]

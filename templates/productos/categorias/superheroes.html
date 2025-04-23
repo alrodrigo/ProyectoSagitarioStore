@@ -64,10 +64,10 @@
                 </div>
             </a>
             <div class="product-actions">
-                <button class="add-to-cart-btn" data-product="{{ product.id }}">
+                <button class="add-to-cart-btn{% if product.stock <= 0 %} disabled{% endif %}" {% if product.stock <= 0 %}disabled{% endif %} data-product-id="{{ product.id }}">
                     <i class="fas fa-shopping-cart"></i>
                 </button>
-                <button class="wishlist-btn" data-product="{{ product.id }}">
+                <button class="wishlist-btn" data-product-id="{{ product.id }}">
                     <i class="far fa-heart"></i>
                 </button>
             </div>
@@ -114,53 +114,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Switch between grid and list view
-        const gridBtn = document.querySelector('.view-btn.grid');
-        const listBtn = document.querySelector('.view-btn.list');
-        const productsContainer = document.querySelector('.products-container');
-        
-        if (gridBtn && listBtn && productsContainer) {
-            gridBtn.addEventListener('click', function() {
-                productsContainer.classList.remove('list-view');
-                gridBtn.classList.add('active');
-                listBtn.classList.remove('active');
-                localStorage.setItem('viewMode', 'grid');
-            });
-            
-            listBtn.addEventListener('click', function() {
-                productsContainer.classList.add('list-view');
-                listBtn.classList.add('active');
-                gridBtn.classList.remove('active');
-                localStorage.setItem('viewMode', 'list');
-            });
-            
-            // Check for saved view preference
-            const savedView = localStorage.getItem('viewMode');
-            if (savedView === 'list') {
-                productsContainer.classList.add('list-view');
-                listBtn.classList.add('active');
-                gridBtn.classList.remove('active');
-            }
-        }
-        
-        // Sort functionality
-        const sortSelect = document.getElementById('sort-by');
-        if (sortSelect) {
-            sortSelect.addEventListener('change', function() {
-                const url = new URL(window.location);
-                url.searchParams.set('sort', this.value);
-                window.location.href = url.toString();
-            });
-            
-            // Set selected option based on URL param
-            const urlParams = new URLSearchParams(window.location.search);
-            const sortParam = urlParams.get('sort');
-            if (sortParam) {
-                sortSelect.value = sortParam;
-            }
-        }
-    });
-</script>
+<script src="{% static 'js/category.js' %}"></script>
 {% endblock %}

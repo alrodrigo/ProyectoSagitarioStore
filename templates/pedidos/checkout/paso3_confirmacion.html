@@ -1,0 +1,111 @@
+{% extends "pedidos/checkout/base_checkout.html" %}
+{% load static %}
+
+{% block title %}Confirmación de Pedido - Proceso de Compra{% endblock %}
+
+{% block checkout_content %}
+<section class="checkout-section">
+    <h1>Revisión y confirmación</h1>
+    
+    <div class="section-content">
+        <div class="order-details">
+            <div class="order-block">
+                <h2>Dirección de envío</h2>
+                <div class="detail-card">
+                    <div class="detail-content">
+                        <p><strong>{{ direccion.nombre_completo }}</strong></p>
+                        <p>{{ direccion.direccion }}</p>
+                        <p>{{ direccion.ciudad }}, {{ direccion.departamento }}{% if direccion.codigo_postal %} - {{ direccion.codigo_postal }}{% endif %}</p>
+                        <p>Tel: {{ direccion.telefono }}</p>
+                    </div>
+                    <a href="{% url 'pedidos:checkout_paso1' %}" class="detail-edit">Cambiar</a>
+                </div>
+            </div>
+            
+            <div class="order-block">
+                <h2>Método de envío</h2>
+                <div class="detail-card">
+                    <div class="detail-content">
+                        <p><strong>{{ metodo_envio.nombre }}</strong></p>
+                        <p>{{ metodo_envio.descripcion }}</p>
+                        <p>Tiempo estimado: {{ metodo_envio.tiempo_estimado }}</p>
+                        <p class="price">{{ metodo_envio.precio }} Bs</p>
+                    </div>
+                    <a href="{% url 'pedidos:checkout_paso2' %}" class="detail-edit">Cambiar</a>
+                </div>
+            </div>
+            
+            <div class="order-block">
+                <h2>Método de pago</h2>
+                <div class="detail-card">
+                    <div class="detail-content">
+                        <p><strong>{{ metodo_pago }}</strong></p>
+                        {% if referencia_pago %}
+                        <p>Referencia: {{ referencia_pago }}</p>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'pedidos:checkout_paso2' %}" class="detail-edit">Cambiar</a>
+                </div>
+            </div>
+            
+            <div class="order-block">
+                <h2>Productos</h2>
+                <div class="order-items">
+                    {% for item in cart_items %}
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img src="{{ item.producto.image.url }}" alt="{{ item.producto.name }}">
+                        </div>
+                        <div class="item-details">
+                            <h3>{{ item.producto.name }}</h3>
+                            <p>Cantidad: {{ item.cantidad }}</p>
+                        </div>
+                        <div class="item-price">
+                            <p>{{ item.subtotal }} Bs</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="order-totals-block">
+                <div class="order-totals">
+                    <div class="total-row">
+                        <span>Subtotal</span>
+                        <span>{{ subtotal }} Bs</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Envío</span>
+                        <span>{{ costo_envio }} Bs</span>
+                    </div>
+                    <div class="total-row final-total">
+                        <span>Total</span>
+                        <span>{{ total }} Bs</span>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="POST" action="{% url 'pedidos:checkout_paso3' %}">
+                {% csrf_token %}
+                
+                <div class="order-notes">
+                    <h2>Notas adicionales (opcional)</h2>
+                    <div class="form-group">
+                        {{ notas_form.notas }}
+                    </div>
+                </div>
+                
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="terms-check" required>
+                    <label for="terms-check">He leído y acepto los <a href="{% url 'terms' %}" target="_blank">Términos y Condiciones</a> y <a href="{% url 'privacy' %}" target="_blank">Política de Privacidad</a></label>
+                </div>
+                
+                <div class="form-actions">
+                    <a href="{% url 'pedidos:checkout_paso2' %}" class="btn btn-outline">Volver</a>
+                    <button type="submit" class="btn btn-primary">Confirmar pedido</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -730,6 +730,34 @@
     color: white;
 }
 
+/* Estilos para el badge de notificaciones */
+.badge-notification {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    color: white;
+    background-color: #e53935;
+    border-radius: 10px;
+    margin-left: 5px;
+}
+
+/* Añadir posicionamiento para el badge en el menú */
+.navbar__link {
+    position: relative;
+}
+
+.navbar__link .badge-notification {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+}
+
 /* === Alert Components (Ya definidos en common.css, verificar si se necesita algo más aquí) === */
 /* Si se necesitan estilos adicionales específicos de componentes, añadirlos aquí */
 

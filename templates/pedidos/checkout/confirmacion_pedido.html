@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pedido Confirmado - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+<link rel="stylesheet" href="{% static 'css/payment.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/payment-status.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<main class="container">
+    <div class="confirmation-page">
+        <div class="confirmation-header">
+            <div class="confirmation-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>¡Gracias por tu pedido!</h1>
+            <p class="confirmation-message">Tu pedido ha sido recibido y se está procesando.</p>
+            <div class="order-number">
+                Número de pedido: <strong>#{{ pedido.id }}</strong>
+            </div>
+        </div>
+        
+        <div class="confirmation-summary">
+            <div class="summary-block">
+                <h2>Detalles del pedido</h2>
+                
+                <div class="order-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha del pedido:</span>
+                        <span class="detail-value">{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estado:</span>
+                        <span class="detail-value status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Método de pago:</span>
+                        <span class="detail-value">{{ pedido.get_metodo_pago_display }}</span>
+                    </div>
+                    {% if pedido.referencia_pago %}
+                    <div class="detail-item">
+                        <span class="detail-label">Referencia de pago:</span>
+                        <span class="detail-value">{{ pedido.referencia_pago }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="summary-blocks">
+                <div class="summary-block address-block">
+                    <h3>Dirección de envío</h3>
+                    <div class="address-info">
+                        <p><strong>{{ pedido.direccion_envio.nombre_completo }}</strong></p>
+                        <p>{{ pedido.direccion_envio.direccion }}</p>
+                        <p>{{ pedido.direccion_envio.ciudad }}, {{ pedido.direccion_envio.departamento }}
+                        {% if pedido.direccion_envio.codigo_postal %} - {{ pedido.direccion_envio.codigo_postal }}{% endif %}</p>
+                        <p>Tel: {{ pedido.direccion_envio.telefono }}</p>
+                    </div>
+                </div>
+                
+                <div class="summary-block shipping-block">
+                    <h3>Método de envío</h3>
+                    <div class="shipping-info">
+                        <p><strong>{{ pedido.metodo_envio.nombre }}</strong></p>
+                        <p>{{ pedido.metodo_envio.descripcion }}</p>
+                        <p>Tiempo estimado: {{ pedido.metodo_envio.tiempo_estimado }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-block">
+                <h3>Productos</h3>
+                <div class="confirmation-items">
+                    {% for item in items %}
+                    <div class="confirmation-item">
+                        <div class="item-image">
+                            <img src="{{ item.producto.image.url }}" alt="{{ item.producto.name }}">
+                        </div>
+                        <div class="item-details">
+                            <h4>{{ item.producto.name }}</h4>
+                            <div class="item-quantity">Cantidad: {{ item.cantidad }}</div>
+                        </div>
+                        <div class="item-price">
+                            <div class="item-unit-price">{{ item.precio }} Bs</div>
+                            <div class="item-total">{{ item.subtotal }} Bs</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="confirmation-totals">
+                    <div class="total-row">
+                        <span>Subtotal</span>
+                        <span>{{ pedido.subtotal }} Bs</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Envío</span>
+                        <span>{{ pedido.costo_envio }} Bs</span>
+                    </div>
+                    <div class="total-row total-final">
+                        <span>Total</span>
+                        <span>{{ pedido.total }} Bs</span>
+                    </div>
+                </div>
+            </div>
+            
+            {% if pedido.notas %}
+            <div class="summary-block">
+                <h3>Notas del pedido</h3>
+                <div class="order-notes">
+                    {{ pedido.notas }}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="summary-block payment-block">
+                <h3>Estado del pago</h3>
+                <div class="payment-info">
+                    {% if pago %}
+                        <div class="payment-status status-{{ pago.estado }}">
+                            <span class="status-indicator"></span>
+                            <span class="status-text">{{ pago.get_estado_display }}</span>
+                        </div>
+                        
+                        {% if pago.estado == 'completado' %}
+                            <p class="payment-message success">El pago ha sido procesado correctamente.</p>
+                            <div class="payment-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Método de pago:</span>
+                                    <span class="detail-value">{{ pago.get_metodo_pago_display }}</span>
+                                </div>
+                                {% if pago.referencia %}
+                                <div class="detail-item">
+                                    <span class="detail-label">Referencia:</span>
+                                    <span class="detail-value">{{ pago.referencia }}</span>
+                                </div>
+                                {% endif %}
+                                {% if pago.id_transaccion %}
+                                <div class="detail-item">
+                                    <span class="detail-label">ID de transacción:</span>
+                                    <span class="detail-value">{{ pago.id_transaccion }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="detail-item">
+                                    <span class="detail-label">Fecha:</span>
+                                    <span class="detail-value">{{ pago.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
+                                </div>
+                            </div>
+                        {% elif pago.estado == 'pendiente' %}
+                            <p class="payment-message warning">
+                                {% if pago.metodo_pago == 'transferencia' %}
+                                    Tu pedido ha sido registrado. Para completarlo, realiza una transferencia bancaria con el monto exacto y envíanos el comprobante:
+                                    <br><br>
+                                    <strong>Banco:</strong> Banco de Crédito de Bolivia<br>
+                                    <strong>Titular:</strong> Sagitario Store S.R.L.<br>
+                                    <strong>Cuenta:</strong> 301-54389201-3-52<br>
+                                    <strong>Monto:</strong> {{ pedido.total }} Bs<br>
+                                    <strong>Referencia:</strong> Pedido #{{ pedido.id }}
+                                {% elif pago.metodo_pago == 'qr' %}
+                                    Tu pedido ha sido registrado. Para completarlo, escanea el siguiente código QR con tu aplicación bancaria o billetera móvil:
+                                    <br><br>
+                                    {% if pago.qr_imagen %}
+                                    <div class="qr-code-container">
+                                        <img src="{{ pago.qr_imagen.url }}" alt="Código QR de pago" class="qr-image">
+                                    </div>
+                                    <br>
+                                    {% if pago.qr_instrucciones %}
+                                    <div class="qr-instructions">
+                                        {{ pago.qr_instrucciones }}
+                                    </div>
+                                    {% endif %}
+                                    <div class="qr-amount">
+                                        <strong>Monto a pagar:</strong> {{ pedido.total }} Bs<br>
+                                        <strong>Referencia:</strong> Pedido #{{ pedido.id }}
+                                    </div>
+                                    {% else %}
+                                    <div class="no-qr-message">
+                                        <p>No se ha configurado un código QR para este pago. Por favor comunícate con atención al cliente para recibir instrucciones.</p>
+                                        <p><i class="fas fa-phone"></i> <a href="tel:+59171234567">+591 71234567</a></p>
+                                    </div>
+                                    {% endif %}
+                                    <div class="qr-upload-section">
+                                        <p>Una vez realizado el pago, puedes subir el comprobante aquí:</p>
+                                        <form action="{% url 'pedidos:subir_comprobante' pago.id %}" method="post" enctype="multipart/form-data" class="comprobante-form">
+                                            {% csrf_token %}
+                                            <div class="file-upload">
+                                                <label for="comprobante">Seleccionar comprobante</label>
+                                                <input type="file" name="comprobante" id="comprobante" accept="image/*" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Subir comprobante</button>
+                                        </form>
+                                    </div>
+                                {% elif pago.metodo_pago == 'efectivo' %}
+                                    El pago se realizará en efectivo al momento de la entrega. Por favor, prepara el monto exacto de {{ pedido.total }} Bs.
+                                {% else %}
+                                    Tu pago está siendo procesado. Te notificaremos cuando sea confirmado.
+                                {% endif %}
+                            </p>
+                        {% elif pago.estado == 'fallido' %}
+                            <p class="payment-message error">Ha ocurrido un problema con el pago. Por favor, intenta nuevamente o contacta a soporte.</p>
+                            {% if payment_error %}
+                            <p class="payment-error-details">{{ payment_message }}</p>
+                            {% endif %}
+                        {% endif %}
+                        
+                    {% elif payment_status %}
+                        <div class="payment-status status-{{ payment_status }}">
+                            <span class="status-indicator"></span>
+                            <span class="status-text">
+                                {% if payment_status == 'completed' %}Completado
+                                {% elif payment_status == 'pending' %}Pendiente
+                                {% elif payment_status == 'failed' %}Fallido
+                                {% else %}{{ payment_status }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <p class="payment-message">{{ payment_message|default:"" }}</p>
+                        {% if payment_error %}
+                        <p class="payment-error-details">Error: {{ payment_error }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="payment-message">No se ha registrado información del pago.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="confirmation-info">
+            <div class="info-block">
+                <h3>¿Qué sigue?</h3>
+                <ol class="next-steps">
+                    <li>Te enviaremos un correo electrónico con los datos de confirmación.</li>
+                    <li>Recibirás actualizaciones sobre el estado de tu pedido.</li>
+                    <li>Si elegiste transferencia o QR, te enviaremos los datos para realizar el pago.</li>
+                    <li>Prepararemos tu pedido para el envío una vez confirmado el pago.</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="confirmation-actions">
+            <a href="{% url 'pedidos:mis_pedidos' %}" class="btn btn-primary">Ver mis pedidos</a>
+            <a href="{% url 'productos:home' %}" class="btn btn-outline">Seguir comprando</a>
+        </div>
+    </div>
+</main>
+{% endblock %}

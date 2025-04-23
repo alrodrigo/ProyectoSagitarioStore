@@ -69,6 +69,52 @@ def agregar_al_carrito(request, producto_id):
     else:
         return redirect('carrito:ver_carrito')
 
+@csrf_exempt
+@login_required
+def agregar_ajax(request):
+    if request.method == 'POST':
+        try:
+            producto_id = request.POST.get('product_id')
+            cantidad = int(request.POST.get('quantity', 1))
+            
+            if not producto_id:
+                return JsonResponse({'success': False, 'error': 'ID de producto no proporcionado'})
+            
+            producto = get_object_or_404(Product, id=producto_id)
+            carrito = request.session.get('carrito', {})
+            producto_id = str(producto_id)  # Convertir a string para usar como clave
+            
+            # Verificar stock disponible
+            if producto.stock < cantidad:
+                return JsonResponse({
+                    'success': False, 
+                    'error': f'Solo hay {producto.stock} unidades disponibles de este producto.'
+                })
+            
+            # Añadir al carrito
+            if producto_id in carrito:
+                carrito[producto_id] += cantidad
+            else:
+                carrito[producto_id] = cantidad
+            
+            # Guardar en la sesión
+            request.session['carrito'] = carrito
+            request.session.modified = True  # Forzar que se guarde la sesión
+            
+            # Calcular cantidad total de productos en el carrito
+            cart_count = sum(carrito.values())
+            
+            return JsonResponse({
+                'success': True, 
+                'message': f'{cantidad} unidad(es) de {producto.name} agregada(s) al carrito.',
+                'cart_count': cart_count
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
 @login_required
 def eliminar_del_carrito(request, producto_id):
     carrito = request.session.get('carrito', {})

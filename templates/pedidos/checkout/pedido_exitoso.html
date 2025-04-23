@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}¡Pedido Realizado con Éxito! - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="container order-success-page">
+    <div class="success-container">
+        <div class="success-header">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>¡Pedido realizado con éxito!</h1>
+            <p>Tu pedido ha sido recibido y está siendo procesado.</p>
+        </div>
+        
+        <div class="order-details">
+            <div class="details-row">
+                <div class="details-col">
+                    <h3>Número de Pedido:</h3>
+                    <p>#{{ pedido.id }}</p>
+                </div>
+                <div class="details-col">
+                    <h3>Fecha:</h3>
+                    <p>{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div class="details-col">
+                    <h3>Estado del Pedido:</h3>
+                    <span class="status-badge {{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+                </div>
+                <div class="details-col">
+                    <h3>Total:</h3>
+                    <p class="order-total">{{ pedido.total }} Bs</p>
+                </div>
+            </div>
+        </div>
+        
+        {% if pedido.metodo_pago == 'transferencia' %}
+        <div class="payment-info">
+            <h2>Información de Pago</h2>
+            <p>Por favor realiza la transferencia del importe total de <strong>{{ pedido.total }} Bs</strong> a la siguiente cuenta bancaria:</p>
+            
+            <div class="bank-details">
+                <div class="bank-detail">
+                    <span>Banco:</span>
+                    <strong>Banco Nacional de Bolivia</strong>
+                </div>
+                <div class="bank-detail">
+                    <span>Titular:</span>
+                    <strong>Sagitario Store SRL</strong>
+                </div>
+                <div class="bank-detail">
+                    <span>Cuenta:</span>
+                    <strong>1234567890</strong>
+                </div>
+                <div class="bank-detail">
+                    <span>Tipo de cuenta:</span>
+                    <strong>Corriente</strong>
+                </div>
+                <div class="bank-detail">
+                    <span>Referencia:</span>
+                    <strong>Pedido #{{ pedido.id }}</strong>
+                </div>
+            </div>
+            
+            <div class="payment-instructions">
+                <p>Importante: Incluye el número de pedido en la descripción de la transferencia para que podamos validar tu pago rápidamente.</p>
+                <p>Una vez realizada la transferencia, puedes enviar tu comprobante desde tu área personal, sección "Mis Pedidos".</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if pedido.metodo_pago == 'qr' %}
+        <div class="payment-info">
+            <h2>Información de Pago</h2>
+            <p>Escanea el siguiente código QR para realizar tu pago de <strong>{{ pedido.total }} Bs</strong>:</p>
+            
+            <div class="qr-container">
+                <img src="{% static 'images/qr-ejemplo.png' %}" alt="Código QR de pago">
+            </div>
+            
+            <div class="payment-instructions">
+                <p>Importante: El código QR es válido por 24 horas. Si el pago no se realiza en ese tiempo, tu pedido podría ser cancelado.</p>
+                <p>Una vez realizado el pago, recibirás un correo electrónico de confirmación.</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="next-steps">
+            <h2>¿Qué sigue?</h2>
+            <ol>
+                <li>Recibirás un correo electrónico con los detalles de tu pedido.</li>
+                <li>{% if pedido.metodo_pago == 'efectivo' %}
+                    Prepara el pago en efectivo para cuando recibas tu pedido.
+                    {% else %}
+                    Una vez confirmado el pago, prepararemos tu pedido para envío.
+                    {% endif %}
+                </li>
+                <li>Recibirás actualizaciones del estado de tu pedido por correo electrónico.</li>
+                <li>¡Disfruta de tus productos!</li>
+            </ol>
+        </div>
+        
+        <div class="success-actions">
+            <a href="{% url 'pedidos:mis_pedidos' %}" class="btn btn-primary">Ver mi pedido</a>
+            <a href="{% url 'productos:lista' %}" class="btn btn-outline">Seguir comprando</a>
+        </div>
+    </div>
+    
+    {% if productos_recomendados %}
+    <div class="recommended-products">
+        <h2>Productos que podrían interesarte</h2>
+        
+        <div class="products-grid">
+            {% for producto in productos_recomendados %}
+            <div class="product-card">
+                <a href="{% url 'productos:detalle' producto.id producto.slug %}" class="product-image">
+                    {% if producto.image %}
+                    <img src="{{ producto.image.url }}" alt="{{ producto.name }}">
+                    {% else %}
+                    <img src="{% static 'images/no-image.png' %}" alt="{{ producto.name }}">
+                    {% endif %}
+                </a>
+                <div class="product-content">
+                    <h3><a href="{% url 'productos:detalle' producto.id producto.slug %}">{{ producto.name }}</a></h3>
+                    <div class="product-price">{{ producto.price }} Bs</div>
+                    <a href="{% url 'productos:detalle' producto.id producto.slug %}" class="btn btn-outline btn-sm">Ver detalles</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Script para compartir el pedido
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aquí podría ir código adicional para compartir en redes sociales
+    });
+</script>
+{% endblock %}
