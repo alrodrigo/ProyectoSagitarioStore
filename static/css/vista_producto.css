@@ -117,10 +117,13 @@
 
 /* Product Name */
 .producto-info h1 {
-    font-size: 1.8rem; /* Adjust as needed */
-    margin-bottom: 0.75rem;
-    color: var(--text-heading, #333);
-    line-height: 1.3;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-family: 'Poppins', sans-serif;
 }
 
 @media (min-width: 768px) {
@@ -132,76 +135,93 @@
 /* Meta info (Rating & Stock) */
 .producto-meta {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .rating {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.8rem;
 }
 
 .rating .stars {
-    color: #f8c102; /* Gold color for stars */
+    color: #ffc107;
+    font-size: 1.2rem;
+    display: flex;
+    gap: 0.3rem;
 }
 
-.rating .review-count {
-    color: var(--text-muted, #6c757d);
+.review-count {
+    color: var(--text-muted);
+    font-size: 0.95rem;
 }
 
-.stock-info .disponible {
-    color: #28a745; /* Green */
+.stock-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-weight: 500;
 }
 
-.stock-info .agotado {
-    color: #dc3545; /* Red */
-    font-weight: 500;
+.disponible {
+    color: #2ecc71;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.stock-info i {
-    margin-right: 0.3rem;
+.agotado {
+    color: #e74c3c;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* Price */
 .producto-precio {
-    margin-bottom: 1.5rem;
+    margin: 2rem 0;
     display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
 }
 
 .precio-actual {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: var(--primary, #007bff);
+    font-size: 2.8rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1;
 }
 
 .precio-anterior {
-    font-size: 1.1rem;
-    color: var(--text-muted, #6c757d);
+    font-size: 1.4rem;
+    color: var(--text-muted);
     text-decoration: line-through;
+    opacity: 0.8;
 }
 
 .descuento {
-    background-color: var(--danger, #dc3545);
+    background: linear-gradient(45deg, #ff4e50, #f9d423);
     color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 /* Description */
 .producto-descripcion {
-    margin-bottom: 2rem;
-    color: var(--text-secondary, #555);
-    line-height: 1.6;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
 }
 
 /* Purchase Form */
@@ -315,27 +335,39 @@
 }
 
 .caracteristica {
+    background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 15px;
+    padding: 1.5rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.caracteristica:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
 .caracteristica i {
-    font-size: 1.8rem;
-    color: var(--primary, #007bff);
-    width: 30px; /* Fixed width for alignment */
-    text-align: center;
+    font-size: 2rem;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .caracteristica .texto h3 {
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
-    color: var(--text-heading, #333);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    color: var(--text-dark);
 }
 
 .caracteristica .texto p {
-    font-size: 0.85rem;
-    color: var(--text-muted, #6c757d);
+    font-size: 0.95rem;
+    color: var(--text-muted);
     margin: 0;
 }
 

@@ -1,52 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ category.name }} - Sagitario Store{% endblock %}
+{% block title %}{{ subcategory.name }} - {{ category.name }} - Sagitario Store{% endblock %}
 
-{% block meta_description %}Explora nuestra colección de {{ category.name }} de alta calidad. Encuentra tus personajes favoritos y añádelos a tu colección.{% endblock %}
+{% block meta_description %}Explora nuestra colección de {{ subcategory.name }} dentro de {{ category.name }}. Encuentra figuras de alta calidad de tus personajes favoritos.{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/category.css' %}">
 <style>
-    .subcategory-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        margin: 30px 0;
-    }
-    .subcategory-card {
-        position: relative;
-        width: calc(25% - 15px);
-        border-radius: 10px;
-        overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-    .subcategory-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    }
-    .subcategory-card img {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-    }
-    .subcategory-title {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 15px;
-        text-align: center;
-        font-weight: bold;
-        font-size: 1.1rem;
-        transition: background 0.3s ease;
-    }
-    .subcategory-card:hover .subcategory-title {
-        background: rgba(0, 0, 0, 0.85);
-    }
     .breadcrumbs {
         margin-bottom: 20px;
         display: flex;
@@ -70,40 +31,36 @@
         color: #000;
         font-weight: 500;
     }
-    .subcategories-section {
-        margin-bottom: 40px;
-        background: #f8f9fa;
-        padding: 25px;
-        border-radius: 10px;
+    .subcategory-header {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 30px;
     }
-    .subcategories-section h2 {
-        margin-top: 0;
-        margin-bottom: 20px;
-        color: #333;
-        font-size: 1.5rem;
-        border-bottom: 2px solid #ddd;
-        padding-bottom: 10px;
+    .subcategory-header .image-container {
+        width: 200px;
+        height: 150px;
+        overflow: hidden;
+        margin-right: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    .no-subcategories {
-        padding: 15px;
-        background: #f1f1f1;
-        border-radius: 5px;
-        text-align: center;
-        color: #666;
+    .subcategory-header .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
-    @media screen and (max-width: 992px) {
-        .subcategory-card {
-            width: calc(33.33% - 14px);
-        }
+    .subcategory-info {
+        flex: 1;
     }
     @media screen and (max-width: 768px) {
-        .subcategory-card {
-            width: calc(50% - 10px);
+        .subcategory-header {
+            flex-direction: column;
         }
-    }
-    @media screen and (max-width: 480px) {
-        .subcategory-card {
+        .subcategory-header .image-container {
             width: 100%;
+            height: 200px;
+            margin-right: 0;
+            margin-bottom: 20px;
         }
     }
 </style>
@@ -115,40 +72,26 @@
     <div class="breadcrumbs">
         <a href="{% url 'productos:home' %}">Inicio</a>
         <span class="separator">/</span>
-        {% if is_subcategory %}
-            <a href="{% url 'productos:categoria' parent_category.slug %}">{{ parent_category.name }}</a>
-            <span class="separator">/</span>
-            <span class="current">{{ category.name }}</span>
-        {% else %}
-            <span class="current">{{ category.name }}</span>
-        {% endif %}
+        <a href="{% url 'productos:categoria' category.slug %}">{{ category.name }}</a>
+        <span class="separator">/</span>
+        <span class="current">{{ subcategory.name }}</span>
     </div>
     
-    <section class="category-header">
-        <h1>Figuras de {{ category.name }}</h1>
-        <div class="category-description">
-            <p>{{ category.description|default:"Explora nuestra colección de figuras de alta calidad. Todas nuestras figuras son de los mejores fabricantes y con acabados premium." }}</p>
+    <section class="subcategory-header">
+        <div class="image-container">
+            {% if subcategory.image %}
+                <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}">
+            {% else %}
+                <img src="{% static 'images/no-image.jpg' %}" alt="{{ subcategory.name }}">
+            {% endif %}
+        </div>
+        <div class="subcategory-info">
+            <h1>{{ subcategory.name }}</h1>
+            <div class="subcategory-description">
+                <p>{{ subcategory.description|default:"Explora nuestra colección de figuras de alta calidad de " }}{{ subcategory.name }}.</p>
+            </div>
         </div>
     </section>
-    
-    <!-- Mostrar subcategorías con un diseño mejorado si estamos en una categoría principal -->
-    {% if not is_subcategory and subcategories %}
-    <section class="subcategories-section">
-        <h2>Explora las subcategorías de {{ category.name }}</h2>
-        <div class="subcategory-container">
-            {% for subcategory in subcategories %}
-            <a href="{% url 'productos:subcategoria' category.slug subcategory.slug %}" class="subcategory-card">
-                {% if subcategory.image %}
-                    <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}">
-                {% else %}
-                    <img src="{% static 'images/no-image.jpg' %}" alt="{{ subcategory.name }}">
-                {% endif %}
-                <div class="subcategory-title">{{ subcategory.name }}</div>
-            </a>
-            {% endfor %}
-        </div>
-    </section>
-    {% endif %}
     
     <div class="filter-controls">
         <div class="filter-group">
@@ -170,8 +113,8 @@
     <div class="products-container">
         {% for product in products %}
         <article class="product-card">
-            {% if product.discount_percent %}
-            <div class="product-badge discount">-{{ product.discount_percent }}%</div>
+            {% if product.discount_percentage %}
+            <div class="product-badge discount">-{{ product.discount_percentage }}%</div>
             {% elif product.stock > 0 and product.stock <= 5 %}
             <div class="product-badge stock">¡Últimas unidades!</div>
             {% elif product.stock <= 0 %}
@@ -231,8 +174,8 @@
         {% empty %}
         <div class="no-products">
             <h3>No hay productos disponibles</h3>
-            <p>Lo sentimos, no hay productos en esta categoría actualmente.</p>
-            <a href="{% url 'home' %}" class="btn-primary">Volver al inicio</a>
+            <p>Lo sentimos, no hay productos en esta subcategoría actualmente.</p>
+            <a href="{% url 'productos:categoria' category.slug %}" class="btn-primary">Ver todos los productos de {{ category.name }}</a>
         </div>
         {% endfor %}
     </div>

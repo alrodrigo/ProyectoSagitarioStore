@@ -10,13 +10,37 @@ class Category(models.Model):
     name = models.CharField('Nombre', max_length=100)
     slug = models.SlugField(unique=True, blank=True)
     description = models.TextField('Descripción', blank=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, 
+                             related_name='subcategories', verbose_name='Categoría padre')
+    image = models.ImageField('Imagen', upload_to='categories/', blank=True, null=True)
+    home_image = models.ImageField('Imagen para página de inicio', 
+                                 upload_to='categories/home/', 
+                                 blank=True, 
+                                 null=True,
+                                 help_text='Imagen específica para mostrar en la página de inicio. Si no se proporciona, se usará la imagen principal.')
     created_at = models.DateTimeField('Fecha de creación', default=django.utils.timezone.now)
     updated_at = models.DateTimeField('Fecha de actualización', auto_now=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = slugify(self.name.lower())  # Aseguramos que el slug esté en minúsculas
         super().save(*args, **kwargs)
+    
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('productos:categoria', kwargs={'category_slug': self.slug})
+    
+    @property
+    def is_subcategory(self):
+        """Determina si esta categoría es una subcategoría"""
+        return self.parent is not None
+    
+    @property
+    def main_category(self):
+        """Retorna la categoría principal (de nivel superior) para esta categoría"""
+        if self.parent:
+            return self.parent.main_category
+        return self
 
     class Meta:
         verbose_name = 'Categoría'
@@ -24,6 +48,8 @@ class Category(models.Model):
         ordering = ['name']
 
     def __str__(self):
+        if self.parent:
+            return f"{self.parent.name} > {self.name}"
         return self.name
 
 class Product(models.Model):

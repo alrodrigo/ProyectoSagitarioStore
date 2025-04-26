@@ -26,13 +26,20 @@
             <div class="main-image">
                 <img id="mainProductImage" src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}" alt="{{ product.name }}">
                 
-                {% if product.discount_percent %}
-                <div class="badge badge--error product-badge discount">-{{ product.discount_percent }}%</div> {# Use badge component #}
-                {% elif product.stock > 0 and product.stock <= 5 %}
-                <div class="badge badge--warning product-badge stock">¡Últimas unidades!</div> {# Use badge component #}
-                {% elif product.stock <= 0 %}
-                <div class="badge badge--secondary product-badge out-of-stock">Agotado</div> {# Use badge component #}
-                {% endif %}
+                <div class="product-badge {% if product.is_new %}product-badge--new{% endif %}{% if product.is_hot %}product-badge--hot{% endif %}{% if product.discount %}product-badge--sale{% endif %}">
+                    {% if product.is_new %}
+                        <i class="fas fa-certificate"></i>
+                        <span>Nuevo</span>
+                    {% endif %}
+                    {% if product.is_hot %}
+                        <i class="fas fa-fire"></i>
+                        <span>Destacado</span>
+                    {% endif %}
+                    {% if product.discount %}
+                        <i class="fas fa-tag"></i>
+                        <span>{{ product.discount }}% OFF</span>
+                    {% endif %}
+                </div>
             </div>
             <div class="thumbnail-gallery">
                 <img class="thumbnail active" src="{{ product.image.url }}" alt="{{ product.name }}" onclick="changeImage(this)">

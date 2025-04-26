@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Todos los Productos - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/category.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="category-container">
+    <section class="category-header">
+        <h1>Todos los Productos</h1>
+        <div class="category-description">
+            <p>Explora nuestra colección completa de figuras de alta calidad.</p>
+        </div>
+    </section>
+
+    <div class="filter-controls">
+        <div class="filter-group">
+            <label for="sort-by">Ordenar por:</label>
+            <select id="sort-by" aria-label="Ordenar productos">
+                <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Popularidad</option>
+                <option value="price-low" {% if current_sort == 'price-low' %}selected{% endif %}>Precio: Menor a mayor</option>
+                <option value="price-high" {% if current_sort == 'price-high' %}selected{% endif %}>Precio: Mayor a menor</option>
+                <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Más recientes</option>
+            </select>
+        </div>
+        
+        <div class="view-toggle">
+            <button class="view-btn grid active" aria-label="Ver en cuadrícula"><i class="fas fa-th"></i></button>
+            <button class="view-btn list" aria-label="Ver en lista"><i class="fas fa-list"></i></button>
+        </div>
+    </div>
+
+    <div class="products-container">
+        {% for product in products %}
+            {% include 'components/product_card.html' with product=product %}
+        {% empty %}
+        <div class="no-products">
+            <h3>No hay productos disponibles</h3>
+            <p>Lo sentimos, no hay productos disponibles en este momento.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary">Volver al inicio</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <button class="pagination-btn prev">
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </button>
+        {% else %}
+        <button class="pagination-btn prev" disabled><i class="fas fa-chevron-left"></i></button>
+        {% endif %}
+        
+        <div class="pagination-numbers">
+            {% for num in paginator.page_range %}
+                {% if page_obj.number == num %}
+                <button class="page-number active">{{ num }}</button>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <button class="page-number">
+                    <a href="?page={{ num }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ num }}</a>
+                </button>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if page_obj.has_next %}
+        <button class="pagination-btn next">
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </button>
+        {% else %}
+        <button class="pagination-btn next" disabled><i class="fas fa-chevron-right"></i></button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/category.js' %}"></script>
+{% endblock %}

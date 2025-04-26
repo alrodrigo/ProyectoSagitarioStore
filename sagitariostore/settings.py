@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'usuarios',
     'pedidos',
     'carrito',
+    'django.contrib.humanize',  # New app added
 ]
 
 MIDDLEWARE = [
@@ -68,6 +69,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'pedidos.context_processors.pedidos_context.pedidos_count',
+                'productos.views.categories_processor',  # Nuevo context processor para categorías
             ],
         },
     },

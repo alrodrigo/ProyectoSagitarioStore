@@ -1,0 +1,67 @@
+{% load static %}
+
+<article class="product-card">
+    {% if product.discount_percent %}
+    <div class="product-card__badge product-card__badge--discount">-{{ product.discount_percent }}%</div>
+    {% elif product.stock > 0 and product.stock <= 5 %}
+    <div class="product-card__badge product-card__badge--stock">¡Últimas unidades!</div>
+    {% elif product.stock <= 0 %}
+    <div class="product-card__badge product-card__badge--out">Agotado</div>
+    {% endif %}
+    
+    <a href="{% url 'productos:producto' product.id %}" class="product-card__link">
+        <div class="product-card__image-wrapper">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card__img" loading="lazy">
+            {% else %}
+            <img src="{% static 'images/no-image.png' %}" alt="Sin imagen" class="product-card__img" loading="lazy">
+            {% endif %}
+            <div class="product-card__overlay">
+                <span class="product-card__quick-view btn btn--light btn--sm">Vista rápida</span>
+            </div>
+        </div>
+        <div class="product-card__content">
+            <h2 class="product-card__title">{{ product.name }}</h2>
+            
+            {% if product.stock > 0 %}
+                {% if product.stock <= 5 %}
+                <div class="product-card__stock product-card__stock--low">
+                    <i class="fas fa-exclamation-circle"></i> 
+                    Quedan {{ product.stock }}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="product-card__stock product-card__stock--out">
+                    <i class="fas fa-times-circle"></i> 
+                    Agotado
+                </div>
+            {% endif %}
+            
+            <div class="product-card__price">
+                <span class="product-card__current-price">{{ product.price }} Bs</span>
+                {% if product.original_price %}
+                <span class="product-card__original-price">{{ product.original_price }} Bs</span>
+                {% endif %}
+            </div>
+            <div class="product-card__rating">
+                <span class="product-card__stars">
+                    {% for i in "12345" %}
+                    <i class="{% if forloop.counter <= product.rating %}fas fa-star{% elif forloop.counter == product.rating_ceil %}fas fa-star-half-alt{% else %}far fa-star{% endif %}"></i>
+                    {% endfor %}
+                </span>
+                <span class="product-card__review-count">({{ product.reviews.count }})</span>
+            </div>
+        </div>
+    </a>
+    <div class="product-card__actions">
+        <button class="product-card__btn btn btn--primary{% if product.stock <= 0 %} disabled{% endif %}" 
+                {% if product.stock <= 0 %}disabled{% endif %} 
+                data-product-id="{{ product.id }}">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Añadir</span>
+        </button>
+        <button class="product-card__btn btn btn--outline-secondary" data-product-id="{{ product.id }}">
+            <i class="far fa-heart"></i>
+        </button>
+    </div>
+</article>

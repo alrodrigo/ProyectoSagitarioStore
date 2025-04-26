@@ -41,18 +41,96 @@
     filter: brightness(1.05); /* Sutil brillo al hacer hover */
 }
 
+.product-card__title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    font-family: 'Poppins', sans-serif;
+    transition: color 0.3s ease;
+}
+
+.product-card__price {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    margin: 1rem 0;
+}
+
+.product-card__current-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: 'Poppins', sans-serif;
+}
+
+.product-card__original-price {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    font-size: 0.95rem;
+    opacity: 0.8;
+}
+
+.product-card__rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.product-card__stars {
+    color: #ffc107;
+    display: flex;
+    gap: 0.2rem;
+}
+
+.product-card__review-count {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
 .product-card__badges {
     position: absolute;
-    top: var(--spacing-sm);
-    left: var(--spacing-sm);
+    top: 1rem;
+    right: 1rem;
     display: flex;
-    flex-direction: column; /* Apilar badges verticalmente */
-    gap: var(--spacing-xs);
-    z-index: var(--z-elevate);
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 2;
 }
 
 /* Usar la clase .badge de components.css */
-/* .product-card__badge { ... } */
+.product-card__badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.product-card__badge--discount {
+    background: linear-gradient(45deg, #ff4e50, #f9d423);
+    color: white;
+}
+
+.product-card__badge--stock {
+    background: linear-gradient(45deg, #11998e, #38ef7d);
+    color: white;
+}
+
+.product-card__badge--out {
+    background: linear-gradient(45deg, #232526, #414345);
+    color: white;
+}
 
 .product-card__overlay {
     position: absolute;
@@ -106,57 +184,6 @@
     letter-spacing: 0.5px;
 }
 
-.product-card__title {
-    font-size: var(--font-size-md); /* Tamaño base para título */
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-dark);
-    margin-bottom: var(--spacing-sm);
-    text-decoration: none;
-    line-height: 1.4;
-}
-
-.product-card__title:hover {
-    color: var(--primary);
-}
-
-.product-card__price {
-    display: flex;
-    align-items: baseline; /* Alinear precios */
-    justify-content: center; /* Centrar precios */
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
-}
-
-.product-card__current-price {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--primary);
-}
-
-.product-card__original-price {
-    color: var(--text-muted);
-    text-decoration: line-through;
-    font-size: var(--font-size-sm);
-}
-
-.product-card__rating {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Centrar estrellas */
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-    color: var(--text-muted); /* Color base para estrellas y contador */
-}
-
-.product-card__stars {
-    color: var(--warning); /* Usar color warning para estrellas */
-    font-size: var(--font-size-sm);
-}
-
-.product-card__review-count {
-    font-size: var(--font-size-xs);
-}
-
 .product-card__actions {
     display: flex;
     gap: var(--spacing-sm);
@@ -170,6 +197,101 @@
     flex: 1; /* Ocupar espacio disponible */
     font-size: var(--font-size-sm); /* Botones más pequeños en card */
     padding: 0.5rem 0.8rem;
+}
+
+.product-card__icon-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transform: scale(0);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.product-card:hover .product-card__icon-badge {
+    transform: scale(1);
+}
+
+.product-card__info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    margin: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.product-card:hover .product-card__info-row {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.product-card__info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.product-card__info-item i {
+    font-size: 1.1rem;
+    color: var(--primary);
+}
+
+.product-card__hover-content {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(5px);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all 0.3s ease;
+}
+
+.product-card:hover .product-card__hover-content {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.product-card__stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.product-card__stat i {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    color: white;
+    border-radius: 50%;
+    font-size: 0.8rem;
 }
 
 /* === Category Header === */

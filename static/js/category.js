@@ -4,212 +4,40 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Funcionalidad para cambiar entre vistas de cuadrícula y lista
-    const gridButton = document.querySelector('.view-btn.grid');
-    const listButton = document.querySelector('.view-btn.list');
+    // View toggle functionality
+    const gridBtn = document.querySelector('.view-btn.grid');
+    const listBtn = document.querySelector('.view-btn.list');
     const productsContainer = document.querySelector('.products-container');
     
-    if (gridButton && listButton && productsContainer) {
-        gridButton.addEventListener('click', function() {
+    if (gridBtn && listBtn && productsContainer) {
+        gridBtn.addEventListener('click', function() {
             productsContainer.classList.remove('list-view');
-            gridButton.classList.add('active');
-            listButton.classList.remove('active');
-            // Guardar preferencia en localStorage
-            localStorage.setItem('category-view', 'grid');
+            gridBtn.classList.add('active');
+            listBtn.classList.remove('active');
+            localStorage.setItem('productsView', 'grid');
         });
         
-        listButton.addEventListener('click', function() {
+        listBtn.addEventListener('click', function() {
             productsContainer.classList.add('list-view');
-            listButton.classList.add('active');
-            gridButton.classList.remove('active');
-            // Guardar preferencia en localStorage
-            localStorage.setItem('category-view', 'list');
+            listBtn.classList.add('active');
+            gridBtn.classList.remove('active');
+            localStorage.setItem('productsView', 'list');
         });
         
-        // Recuperar vista preferida del usuario
-        const savedView = localStorage.getItem('category-view');
+        // Restore view preference
+        const savedView = localStorage.getItem('productsView');
         if (savedView === 'list') {
-            productsContainer.classList.add('list-view');
-            listButton.classList.add('active');
-            gridButton.classList.remove('active');
+            listBtn.click();
         }
     }
     
-    // Manejo mejorado de errores en carga de imágenes
-    const productImages = document.querySelectorAll('.img-product img');
-    
-    productImages.forEach(img => {
-        // Añadir clase loading al contenedor mientras carga la imagen
-        const imgContainer = img.closest('.img-product');
-        if (imgContainer && !img.complete) {
-            imgContainer.classList.add('loading');
-        }
-        
-        // Marcar como loaded cuando la imagen cargue correctamente
-        img.addEventListener('load', function() {
-            const container = this.closest('.img-product');
-            if (container) {
-                container.classList.remove('loading');
-                // Asegurar que la imagen sea visible
-                this.style.opacity = '1';
-                // Eliminar clase error si existe
-                this.classList.remove('error');
-            }
-        });
-        
-        // Manejar errores de carga de imagen
-        img.addEventListener('error', function() {
-            console.log('Error cargando imagen:', this.src);
-            
-            // Añadir clase error para activar CSS de fallback
-            this.classList.add('error');
-            
-            const container = this.closest('.img-product');
-            if (container) {
-                container.classList.remove('loading');
-                
-                // Disparar un evento personalizado para que otros scripts puedan reaccionar
-                container.dispatchEvent(new CustomEvent('image-error', {
-                    bubbles: true,
-                    detail: { imgSrc: this.src }
-                }));
-            }
-        });
-        
-        // Si la imagen ya está en el DOM, verificar su estado
-        if (img.complete) {
-            if (img.naturalHeight === 0 || img.naturalWidth === 0) {
-                // La imagen falló al cargar
-                img.dispatchEvent(new Event('error'));
-            } else {
-                // La imagen ya estaba cargada
-                img.dispatchEvent(new Event('load'));
-            }
-        }
-    });
-    
-    // Funcionalidad para ordenar productos
+    // Sorting functionality
     const sortSelect = document.getElementById('sort-by');
     if (sortSelect) {
         sortSelect.addEventListener('change', function() {
-            const value = this.value;
-            const url = new URL(window.location.href);
-            
-            // Actualizar parámetro de orden en la URL
-            url.searchParams.set('sort', value);
-            
-            // Mantener el parámetro de paginación si existe
-            const currentPage = url.searchParams.get('page');
-            if (currentPage) {
-                url.searchParams.set('page', '1'); // Volver a la primera página al cambiar el orden
-            }
-            
-            // Redirigir a la URL actualizada
-            window.location.href = url.toString();
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('sort', this.value);
+            window.location.href = currentUrl.toString();
         });
-        
-        // Establecer el valor seleccionado basado en la URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const sortParam = urlParams.get('sort');
-        if (sortParam) {
-            sortSelect.value = sortParam;
-        }
-    }
-    
-    // Funcionalidad para añadir productos al carrito mediante AJAX
-    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn:not(.disabled)');
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation(); // Evita que el evento se propague al enlace padre
-            
-            const productId = this.getAttribute('data-product-id');
-            if (!productId) return;
-            
-            // Botón visual de carga
-            const originalHTML = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            this.disabled = true;
-            
-            // Datos para la petición AJAX
-            const formData = new FormData();
-            formData.append('product_id', productId);
-            formData.append('quantity', 1); // Por defecto añadimos 1 unidad
-            
-            // Realizar petición AJAX
-            fetch('/carrito/agregar-ajax/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Restaurar botón
-                this.innerHTML = originalHTML;
-                this.disabled = false;
-                
-                if (data.success) {
-                    showNotification('<i class="fas fa-check-circle"></i> Producto añadido al carrito', 'success');
-                    
-                    // Actualizar contador del carrito en el navbar si existe
-                    const cartCountElement = document.querySelector('.cart-count');
-                    if (cartCountElement && data.cart_count !== undefined) {
-                        cartCountElement.textContent = data.cart_count;
-                    }
-                } else {
-                    showNotification('<i class="fas fa-exclamation-circle"></i> ' + (data.error || 'Error al añadir al carrito'), 'error');
-                }
-            })
-            .catch(error => {
-                // Restaurar botón
-                this.innerHTML = originalHTML;
-                this.disabled = false;
-                
-                console.error('Error:', error);
-                showNotification('<i class="fas fa-exclamation-circle"></i> Error de conexión', 'error');
-            });
-        });
-    });
-    
-    // Función para mostrar notificaciones
-    function showNotification(message, type) {
-        // Crear elemento de notificación
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = message;
-        
-        // Añadir al DOM
-        document.body.appendChild(notification);
-        
-        // Mostrar notificación con animación
-        setTimeout(() => {
-            notification.classList.add('show');
-            
-            // Ocultar después de un tiempo
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
-            }, 3000);
-        }, 100);
-    }
-    
-    // Función para obtener cookies (CSRF token)
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
     }
 });

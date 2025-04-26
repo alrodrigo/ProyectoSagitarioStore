@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     {% load static %}
+    {% load productos_tags %}
     {% block pre_common_css %}{% endblock %}
     <link rel="stylesheet" href="{% static 'css/common.css' %}">
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
@@ -28,9 +29,22 @@
                         Categorías <i class="fa fa-caret-down"></i>
                     </button>
                     <div class="dropdown__content">
-                        <a href="{% url 'productos:categoria' 'anime' %}" class="navbar__link">Anime</a>
-                        <a href="{% url 'productos:categoria' 'superheroes' %}" class="navbar__link">Superhéroes</a>
-                        <a href="#" class="navbar__link">Otros</a>
+                        {% for category in all_categories %}
+                            {% if categories_with_subs|get_item:category %}
+                                <div class="dropdown-submenu">
+                                    <a href="{% url 'productos:categoria' category.slug %}" class="navbar__link">{{ category.name }}</a>
+                                    <div class="dropdown-submenu__content">
+                                        {% for subcategory in categories_with_subs|get_item:category %}
+                                            <a href="{% url 'productos:subcategoria' category.slug subcategory.slug %}" class="navbar__link">{{ subcategory.name }}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <a href="{% url 'productos:categoria' category.slug %}" class="navbar__link">{{ category.name }}</a>
+                            {% endif %}
+                        {% empty %}
+                            <a href="#" class="navbar__link">No hay categorías</a>
+                        {% endfor %}
                     </div>
                 </div>
             </nav>
@@ -192,6 +206,9 @@
     
     <!-- Cart Utils Script -->
     <script src="{% static 'js/cart-utils.js' %}"></script>
+    
+    <!-- Product Card Interactions Script -->
+    <script src="{% static 'js/product-card.js' %}"></script>
     
     <!-- Script para cerrar notificaciones manualmente -->
     <script>
