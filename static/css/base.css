@@ -1,0 +1,210 @@
+/* Base CSS para toda la aplicación */
+/* Las siguientes importaciones se eliminan porque estos archivos ya se cargan en base.html */
+/* @import url('common.css');
+   @import url('typography.css');
+   @import url('utilities.css');
+   @import url('animations.css'); */
+
+/* Aplicación de reset y comportamientos básicos */
+html {
+    scroll-behavior: smooth;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--background);
+    color: var(--text);
+    font-family: var(--font-primary, 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif);
+    padding-top: var(--navbar-height);
+    overflow-x: hidden; /* Evitar scroll horizontal */
+}
+
+/* Contenedor principal para el contenido de la página */
+.main-content {
+    flex: 1;
+    padding: var(--spacing-md) 0;
+    animation: pageIn 0.5s ease-out forwards; /* Animación al cargar la página */
+}
+
+.container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+}
+
+/* Enlaces */
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: var(--transition-colors);
+    position: relative;
+}
+
+a:hover {
+    color: var(--primary-dark);
+}
+
+a:focus-visible {
+    outline: 2px solid var(--primary-light);
+    outline-offset: 2px;
+}
+
+/* Mensajes de alerta */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin: 1rem auto;
+    max-width: var(--container-width);
+    z-index: var(--z-toast);
+    position: relative;
+}
+
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.alert::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+}
+
+.alert i {
+    margin-right: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.alert-success {
+    background-color: var(--success-light);
+    color: var(--success-dark);
+}
+
+.alert-success::before {
+    background-color: var(--success);
+}
+
+.alert-error, .alert-danger {
+    background-color: var(--error-light);
+    color: var(--error-dark);
+}
+
+.alert-error::before, .alert-danger::before {
+    background-color: var(--error);
+}
+
+.alert-warning {
+    background-color: var(--warning-light);
+    color: var(--warning-dark);
+}
+
+.alert-warning::before {
+    background-color: var(--warning);
+}
+
+.alert-info {
+    background-color: var(--info-light);
+    color: var(--info-dark);
+}
+
+.alert-info::before {
+    background-color: var(--info);
+}
+
+/* Animación para mensajes de alerta */
+.alert {
+    animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.alert.fade-out {
+    animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* Asegurarse que las animaciones keyframe estén disponibles globalmente */
+@keyframes pageIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Efectos para imágenes y elementos media */
+img, video, iframe {
+    max-width: 100%;
+    transition: var(--transition-transform);
+}
+
+/* Efectos hover para enlaces y botones */
+a, button {
+    will-change: transform, color;
+}
+
+/* Efectos de focus optimizados para accesibilidad */
+:focus {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Estilos responsive */
+@media (max-width: 768px) {
+    .container {
+        padding-left: var(--spacing-sm);
+        padding-right: var(--spacing-sm);
+    }
+    
+    .alert {
+        margin-left: var(--spacing-sm);
+        margin-right: var(--spacing-sm);
+    }
+}

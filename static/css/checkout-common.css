@@ -1,0 +1,305 @@
+/* 
+ * ARCHIVO DE ESTILOS COMUNES PARA CHECKOUT
+ * Siguiendo metodología BEM (Block Element Modifier)
+ */
+
+/* Variables y configuración */
+:root {
+  --checkout-primary-color: var(--primary);
+  --checkout-text-color: var(--text);
+  --checkout-background-color: var(--background);
+  --checkout-border-color: #e0e0e0;
+  --checkout-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --checkout-radius: 8px;
+}
+
+/* BLOQUES PRINCIPALES */
+
+/* Bloque: contenedor de checkout */
+.checkout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Bloque: layout de checkout */
+.checkout__layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+}
+
+/* Bloque: sección principal de checkout */
+.checkout__main {
+  background-color: #fff;
+  border-radius: var(--checkout-radius);
+  box-shadow: var(--checkout-shadow);
+  padding: 1.5rem;
+}
+
+/* Bloque: resumen lateral de checkout */
+.checkout__summary {
+  position: sticky;
+  top: 100px;
+}
+
+/* Bloque: sección de checkout */
+.checkout__section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.checkout__section:last-child {
+  border-bottom: none;
+}
+
+/* Bloque: encabezado */
+.checkout__header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Elementos del encabezado */
+.checkout__title {
+  font-size: 1.5rem;
+  color: var(--checkout-text-color);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #eee;
+}
+
+.checkout__subtitle {
+  font-size: 1.2rem;
+  margin: 1.5rem 0 1rem;
+  color: #444;
+}
+
+/* Bloque: progreso de checkout */
+.checkout-progress {
+  margin-bottom: 2rem;
+}
+
+/* Elementos del progreso */
+.checkout-progress__steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.checkout-progress__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100px;
+  text-align: center;
+}
+
+.checkout-progress__number {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #555;
+  border: 2px solid #e0e0e0;
+}
+
+.checkout-progress__title {
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+}
+
+.checkout-progress__line {
+  flex: 1;
+  height: 3px;
+  background-color: #e0e0e0;
+  margin: 0 10px;
+  position: relative;
+  top: -17.5px;
+}
+
+/* Modificadores del progreso */
+.checkout-progress__step--active .checkout-progress__number {
+  background-color: var(--checkout-primary-color);
+  color: white;
+  border-color: var(--checkout-primary-color);
+}
+
+.checkout-progress__step--active .checkout-progress__title {
+  color: var(--checkout-primary-color);
+  font-weight: bold;
+}
+
+/* Bloque: Formulario de checkout */
+.checkout-form {
+  flex: 1;
+}
+
+/* Bloque: Grupo de formulario */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Elementos del formulario */
+.form-group__label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--checkout-text-color);
+  font-weight: 500;
+}
+
+.form-group__input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--checkout-border-color);
+  border-radius: var(--checkout-radius);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group__input:focus {
+  outline: none;
+  border-color: var(--checkout-primary-color);
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+/* Bloque: Fila de formulario */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Bloque: Cuadro de resumen */
+.summary-box {
+  background-color: #fff;
+  border-radius: var(--checkout-radius);
+  box-shadow: var(--checkout-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Elementos del resumen */
+.summary-box__title {
+  font-size: 1.2rem;
+  margin-bottom: 1.2rem;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.summary-box__items {
+  margin-bottom: 1.5rem;
+}
+
+.summary-box__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-box__item-info {
+  display: flex;
+  align-items: center;
+}
+
+.summary-box__item-quantity {
+  margin-right: 0.5rem;
+  color: #777;
+}
+
+.summary-box__item-name {
+  font-size: 0.95rem;
+}
+
+.summary-box__item-price {
+  font-weight: 500;
+}
+
+.summary-box__totals {
+  margin-top: 1.5rem;
+}
+
+.summary-box__row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.summary-box__row--total {
+  border-top: 1px solid #ddd;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Bloque: Acciones de checkout */
+.checkout-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Bloque: Botones */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn--primary {
+  background: var(--checkout-primary-color);
+  color: white;
+}
+
+.btn--secondary {
+  background: var(--checkout-background-color);
+  color: var(--checkout-text-color);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--checkout-shadow);
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .checkout__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

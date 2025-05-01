@@ -30,7 +30,7 @@
             <nav class="breadcrumb" aria-label="breadcrumb">
                 <ol>
                     <li><a href="{% url 'productos:home' %}">Inicio</a></li>
-                    <li><a href="{% url 'productos:categoria' producto.category.name %}">{{ producto.category.name }}</a></li>
+                    <li><a href="{% url 'productos:categoria' producto.category.slug %}">{{ producto.category.name }}</a></li>
                     <li aria-current="page">{{ producto.name }}</li>
                 </ol>
             </nav>

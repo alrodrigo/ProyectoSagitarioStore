@@ -8,18 +8,26 @@ from django.http import JsonResponse
 @login_required
 def ver_carrito(request):
     carrito = request.session.get('carrito', {})
+    if not carrito:
+        return render(request, 'carrito/carrito.html', {'productos': [], 'total': 0})
+    
+    # Obtener todos los productos en una sola consulta
+    producto_ids = list(carrito.keys())
+    productos_query = Product.objects.filter(id__in=producto_ids)
+    productos_dict = {str(p.id): p for p in productos_query}
+    
     productos = []
     total = 0
     
     for producto_id, cantidad in carrito.items():
-        producto = get_object_or_404(Product, id=producto_id)
-        subtotal = producto.price * cantidad
-        total += subtotal
-        productos.append({
-            'producto': producto,
-            'cantidad': cantidad,
-            'subtotal': subtotal
-        })
+        if producto := productos_dict.get(producto_id):
+            subtotal = producto.price * cantidad
+            total += subtotal
+            productos.append({
+                'producto': producto,
+                'cantidad': cantidad,
+                'subtotal': subtotal
+            })
     
     return render(request, 'carrito/carrito.html', {
         'productos': productos,

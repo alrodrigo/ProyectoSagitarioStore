@@ -3,6 +3,7 @@ from django.conf import settings
 from productos.models import Product
 from django.utils import timezone
 import uuid
+from .services.whatsapp_service import WhatsAppNotificationService
 
 class DireccionEnvio(models.Model):
     """Modelo para almacenar direcciones de envío de los usuarios"""
@@ -105,11 +106,14 @@ class Pedido(models.Model):
         is_new = self._state.adding
         # Comprobar si el estado ha cambiado ANTES de llamar a super().save()
         estado_cambiado = False
+        estado_anterior = None
+        
         if not is_new and self.pk: # Solo si el objeto ya existe en la BD
             try:
                 pedido_anterior = Pedido.objects.get(pk=self.pk)
                 if pedido_anterior.estado != self.estado:
                     estado_cambiado = True
+                    estado_anterior = pedido_anterior.estado
             except Pedido.DoesNotExist:
                 # El objeto aún no está en la BD, se tratará como nuevo
                 is_new = True
@@ -117,26 +121,39 @@ class Pedido(models.Model):
         super().save(*args, **kwargs) # Guardar el pedido primero
 
         if not is_new and estado_cambiado:
-            # Crear entrada de seguimiento automáticamente
+            # Crear entrada de seguimiento para el nuevo estado
             descripcion_seguimiento = f"Estado del pedido actualizado a: {self.get_estado_display()}."
-            # Podrías añadir lógica para descripciones más específicas si quieres
-            if self.estado == 'enviado':
-                 descripcion_seguimiento = "El pedido ha sido enviado." # Ejemplo
-            elif self.estado == 'entregado':
-                 descripcion_seguimiento = "El pedido ha sido entregado." # Ejemplo
-            elif self.estado == 'cancelado':
-                 descripcion_seguimiento = "El pedido ha sido cancelado." # Ejemplo
-            elif self.estado == 'pagado':
-                 descripcion_seguimiento = "El pago del pedido ha sido confirmado." # Ejemplo
-
-            SeguimientoPedido.objects.create(
-                pedido=self,
-                estado=self.estado,
-                descripcion=descripcion_seguimiento
-            )
+            whatsapp_url = None
+            
+            # Evitar duplicación de seguimientos - comprobar si ya existe un seguimiento con este estado
+            if not SeguimientoPedido.objects.filter(pedido=self, estado=self.estado).exists():
+                # Lógica específica para cada estado
+                if self.estado == 'enviado':
+                    descripcion_seguimiento = "El pedido ha sido enviado y está en camino."
+                    # Generar notificación WhatsApp para envío
+                    whatsapp_url = WhatsAppNotificationService.send_shipping_notification(self)
+                elif self.estado == 'entregado':
+                    descripcion_seguimiento = "El pedido ha sido entregado exitosamente."
+                elif self.estado == 'cancelado':
+                    descripcion_seguimiento = "El pedido ha sido cancelado."
+                elif self.estado == 'pagado':
+                    descripcion_seguimiento = "El pago del pedido ha sido confirmado. Estamos preparando tu pedido."
+                    # Generar notificación WhatsApp para pago confirmado
+                    whatsapp_url = WhatsAppNotificationService.send_payment_confirmation(self)
+                elif self.estado == 'en_preparacion':
+                    descripcion_seguimiento = "Tu pedido está siendo preparado."
+    
+                # Crear el seguimiento con la URL de WhatsApp si existe
+                seguimiento = SeguimientoPedido.objects.create(
+                    pedido=self,
+                    estado=self.estado,
+                    descripcion=descripcion_seguimiento,
+                    whatsapp_notification_url=whatsapp_url,
+                    whatsapp_sent=bool(whatsapp_url)  # Marcamos como enviado si hay URL
+                )
 
         elif is_new: # Si es un pedido nuevo, crear seguimiento inicial
-             SeguimientoPedido.objects.create(
+            SeguimientoPedido.objects.create(
                 pedido=self,
                 estado=self.estado, # Estado inicial (usualmente 'pendiente')
                 descripcion="Pedido creado y pendiente de pago."
@@ -180,6 +197,12 @@ class SeguimientoPedido(models.Model):
     estado = models.CharField(max_length=20, choices=Pedido.ESTADO_CHOICES)
     descripcion = models.TextField()
     fecha = models.DateTimeField(default=timezone.now)
+    whatsapp_notification_url = models.URLField(blank=True, null=True, 
+                                            verbose_name="URL de notificación WhatsApp",
+                                            help_text="URL generada para enviar notificación por WhatsApp")
+    whatsapp_sent = models.BooleanField(default=False, 
+                                      verbose_name="Notificación WhatsApp enviada",
+                                      help_text="Indica si la notificación por WhatsApp fue enviada")
     
     def __str__(self):
         return f"Seguimiento #{self.id} - Pedido #{self.pedido.id} - {self.estado}"

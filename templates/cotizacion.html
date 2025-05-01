@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Cotización de Producto | Sagitario Store{% endblock %}
+
+{% block extra_css %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/cotizacion.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="cotizacion-form">
+        <h1>Solicitar Cotización de Producto</h1>
+        
+        <div class="cotizacion-info">
+            <p>¿No encontraste lo que buscas? Solicita una cotización para cualquier figura de anime o coleccionable que necesites.</p>
+            <p>Completa el formulario con los detalles del producto y te contactaremos a la brevedad con información sobre disponibilidad y precio.</p>
+        </div>
+        
+        <form id="cotizacionForm">
+            <div class="form-group">
+                <label for="nombreProducto">Nombre del Producto</label>
+                <input type="text" id="nombreProducto" name="nombreProducto" required placeholder="Ej: Figura Attack on Titan - Eren Jaeger">
+            </div>
+            
+            <div class="form-group">
+                <label for="codigoProducto">Código o Referencia (si lo conoce)</label>
+                <input type="text" id="codigoProducto" name="codigoProducto" placeholder="Ej: SNK-EJ001">
+            </div>
+            
+            <div class="form-group">
+                <label for="descripcion">Descripción Detallada</label>
+                <textarea id="descripcion" name="descripcion" required placeholder="Describe con detalle el producto que buscas, incluyendo tamaño, material, versión, etc."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="imagenProducto">Imagen de Referencia</label>
+                <input type="file" id="imagenProducto" name="imagenProducto" class="file-input" accept="image/*">
+                <div class="preview-container">
+                    <img id="imagenPreview" src="#" alt="Vista previa">
+                </div>
+                
+                <div class="image-options" id="imageOptions">
+                    <h4>La imagen se enviará en un segundo paso</h4>
+                    <div class="option">
+                        <p>WhatsApp no permite adjuntar archivos automáticamente. Para enviar la imagen de referencia:</p>
+                        <a href="#" id="downloadImage" class="download-link" download="producto_referencia.jpg">
+                            Descargar imagen
+                        </a>
+                        <p class="small">Después de enviar el formulario, WhatsApp se abrirá automáticamente. Adjunta la imagen que has descargado en el chat.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="nombreCliente">Tu Nombre</label>
+                <input type="text" id="nombreCliente" name="nombreCliente" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="telefonoCliente">Tu Teléfono/WhatsApp</label>
+                <input type="tel" id="telefonoCliente" name="telefonoCliente" required placeholder="+591 xxxxxxxx">
+            </div>
+            
+            <div class="step-instructions" id="stepInstructions">
+                <h3>Instrucciones para enviar tu cotización:</h3>
+                <ol>
+                    <li>Al hacer clic en "Enviar Cotización" se abrirá WhatsApp con los detalles del producto.</li>
+                    <li>Si has incluido una imagen, abre WhatsApp y adjúntala manualmente al chat con el administrador.</li>
+                    <li>El administrador revisará tu solicitud y te responderá con la cotización lo antes posible.</li>
+                </ol>
+            </div>
+            
+            <button type="submit" class="btn-submit">
+                Enviar Cotización a WhatsApp <i class="fab fa-whatsapp"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'js/cotizacion.js' %}"></script>
+{% endblock %}

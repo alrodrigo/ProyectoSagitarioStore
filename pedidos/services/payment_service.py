@@ -11,8 +11,29 @@ from django.conf import settings
 from django.db.models import Q
 from django.core.files.base import ContentFile
 from ..models import Pedido, Pago, QRPredefinido
+import functools
+import time
+import asyncio
+from asgiref.sync import sync_to_async
 
 logger = logging.getLogger(__name__)
+
+def retry_on_failure(max_attempts=3, delay_seconds=2):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            attempts = 0
+            while attempts < max_attempts:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    attempts += 1
+                    if attempts == max_attempts:
+                        raise e
+                    time.sleep(delay_seconds)
+            return None
+        return wrapper
+    return decorator
 
 class PaymentProcessor:
     """Clase base para procesar pagos"""
@@ -20,9 +41,32 @@ class PaymentProcessor:
         """Método abstracto para procesar pagos"""
         raise NotImplementedError("Las subclases deben implementar este método")
     
+    @retry_on_failure(max_attempts=3)
     def verify_payment(self, payment_id):
         """Método abstracto para verificar el estado de un pago"""
         raise NotImplementedError("Las subclases deben implementar este método")
+    
+    async def process_payment_async(self, pedido_id, metodo_pago, token=None, datos=None):
+        """Versión asíncrona del procesamiento de pagos"""
+        try:
+            # Convertir el método sync a async
+            result = await sync_to_async(self.process_payment)(
+                pedido_id, metodo_pago, token, datos
+            )
+            return result
+        except Exception as e:
+            # Log the error and re-raise
+            logger.error(f"Error processing payment: {str(e)}")
+            raise
+    
+    async def verify_payment_async(self, payment_id):
+        """Versión asíncrona de la verificación de pagos"""
+        try:
+            result = await sync_to_async(self.verify_payment)(payment_id)
+            return result
+        except Exception as e:
+            logger.error(f"Error verifying payment: {str(e)}")
+            raise
 
 class SimuladorPago(PaymentProcessor):
     """Simulador de pasarela de pagos para pruebas"""
@@ -200,7 +244,7 @@ class QRPagoProcessor(PaymentProcessor):
             # 1. BUSCAR QR PREDEFINIDO: Intentar usar primero un QR predefinido activo
             qr_predefinido = QRPredefinido.objects.filter(activo=True).first()
             
-            if qr_predefinido:
+            if (qr_predefinido):
                 # Usar el QR predefinido
                 pago.qr_imagen.save(
                     f'qr_predefinido_{qr_predefinido.id}_{pedido.id}.png',
@@ -341,6 +385,7 @@ class QRPagoProcessor(PaymentProcessor):
             logger.error(f"Error al generar imagen QR: {str(e)}")
             return None
     
+    @retry_on_failure(max_attempts=3)
     def verify_payment(self, payment_id):
         """
         Verifica el estado de un pago por QR
@@ -444,6 +489,7 @@ class TransferenciaBancariaPago(PaymentProcessor):
                 'message': 'Error interno al registrar el pago'
             }
     
+    @retry_on_failure(max_attempts=3)
     def verify_payment(self, payment_id):
         """
         Verificar el estado de un pago por transferencia
@@ -526,6 +572,7 @@ class EfectivoPago(PaymentProcessor):
                 'message': 'Error interno al registrar el pago'
             }
     
+    @retry_on_failure(max_attempts=3)
     def verify_payment(self, payment_id):
         """
         Verificar el estado de un pago en efectivo

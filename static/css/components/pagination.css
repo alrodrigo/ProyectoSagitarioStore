@@ -1,0 +1,117 @@
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    margin: var(--spacing-6) 0;
+}
+
+.pagination-item {
+    min-width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    font-size: var(--text-sm);
+    color: var(--text);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pagination-item:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.pagination-item.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.pagination-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.pagination-ellipsis {
+    color: var(--text-muted);
+    padding: 0 var(--spacing-2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .pagination {
+        gap: var(--spacing-1);
+    }
+
+    .pagination-item {
+        min-width: 36px;
+        height: 36px;
+        font-size: var(--text-xs);
+    }
+
+    /* Hide some page numbers on mobile */
+    .pagination-number:not(.active):not(:first-child):not(:last-child):not(:nth-child(2)):not(:nth-last-child(2)) {
+        display: none;
+    }
+}
+
+/* Loading state */
+.pagination-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    padding: var(--spacing-4);
+}
+
+.pagination-loading::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spinner 0.6s linear infinite;
+}
+
+@keyframes spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Per page selector */
+.items-per-page {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin-left: auto;
+}
+
+.items-per-page-label {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+}
+
+.items-per-page-select {
+    padding: var(--spacing-1) var(--spacing-2);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    font-size: var(--text-sm);
+    color: var(--text);
+    background: white;
+    cursor: pointer;
+}
+
+.items-per-page-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}

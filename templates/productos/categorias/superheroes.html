@@ -22,10 +22,10 @@
         <div class="filter-group">
             <label for="sort-by">Ordenar por:</label>
             <select id="sort-by" aria-label="Ordenar productos">
-                <option value="popular">Popularidad</option>
-                <option value="price-low">Precio: Menor a mayor</option>
-                <option value="price-high">Precio: Mayor a menor</option>
-                <option value="newest">Más recientes</option>
+                <option value="popular" {% if request.GET.sort == 'popular' or not request.GET.sort %}selected{% endif %}>Popularidad</option>
+                <option value="price-low" {% if request.GET.sort == 'price-low' %}selected{% endif %}>Precio: Menor a mayor</option>
+                <option value="price-high" {% if request.GET.sort == 'price-high' %}selected{% endif %}>Precio: Mayor a menor</option>
+                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Más recientes</option>
             </select>
         </div>
         
@@ -85,28 +85,32 @@
     <div class="pagination">
         {% if page_obj.has_previous %}
         <button class="pagination-btn prev">
-            <a href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-chevron-left"></i></a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}"><i class="fas fa-chevron-left"></i></a>
         </button>
         {% else %}
-        <button class="pagination-btn prev" disabled><i class="fas fa-chevron-left"></i></button>
+        <button class="pagination-btn prev" disabled>
+            <i class="fas fa-chevron-left"></i>
+        </button>
         {% endif %}
         
         <div class="pagination-numbers">
-            {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-            <button class="page-number active">{{ num }}</button>
-            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-            <button class="page-number"><a href="?page={{ num }}">{{ num }}</a></button>
+            {% for i in paginator.page_range %}
+            {% if i == page_obj.number %}
+            <span class="page-number active">{{ i }}</span>
+            {% elif i > page_obj.number|add:"-3" and i < page_obj.number|add:"3" %}
+            <a href="?page={{ i }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="page-number">{{ i }}</a>
             {% endif %}
             {% endfor %}
         </div>
         
         {% if page_obj.has_next %}
         <button class="pagination-btn next">
-            <a href="?page={{ page_obj.next_page_number }}"><i class="fas fa-chevron-right"></i></a>
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}"><i class="fas fa-chevron-right"></i></a>
         </button>
         {% else %}
-        <button class="pagination-btn next" disabled><i class="fas fa-chevron-right"></i></button>
+        <button class="pagination-btn next" disabled>
+            <i class="fas fa-chevron-right"></i>
+        </button>
         {% endif %}
     </div>
     {% endif %}
@@ -114,5 +118,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/category.js' %}"></script>
+<script src="{% static 'js/superheroes.js' %}"></script>
 {% endblock %}

@@ -10,7 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+import environ
 from pathlib import Path
+
+# Inicializar environ
+env = environ.Env()
+# Leer el archivo .env si existe
+environ.Env.read_env(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -155,3 +161,14 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+
+# Configuración para WhatsApp Business API
+# Para configurar, consigue estas credenciales del panel de WhatsApp Business:
+# 1. Ve a https://developers.facebook.com/
+# 2. Configura WhatsApp Business API
+# 3. Copia el Phone Number ID y Access Token
+WHATSAPP_PHONE_NUMBER_ID = env('WHATSAPP_PHONE_NUMBER_ID', default='')
+WHATSAPP_ACCESS_TOKEN = env('WHATSAPP_ACCESS_TOKEN', default='')
+# Si WHATSAPP_AUTO_SEND es True, se enviarán mensajes automáticamente mediante la API
+# Si es False, solo se generarán enlaces para envío manual
+WHATSAPP_AUTO_SEND = True

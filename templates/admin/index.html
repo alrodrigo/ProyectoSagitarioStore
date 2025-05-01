@@ -1,0 +1,282 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+<style>
+    .admin-index-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .admin-panel {
+        flex: 1;
+        min-width: 300px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+    
+    .admin-panel h2 {
+        color: #333;
+        margin-top: 0;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 18px;
+    }
+    
+    .quick-actions {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+    
+    .quick-actions h3 {
+        margin-top: 0;
+        font-size: 16px;
+        color: #333;
+    }
+    
+    .action-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .action-btn {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #5c6bc0;
+        color: white !important;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: background-color 0.2s;
+    }
+    
+    .action-btn:hover {
+        background-color: #3f51b5;
+    }
+    
+    .action-btn.success {
+        background-color: #4CAF50;
+    }
+    
+    .action-btn.success:hover {
+        background-color: #388E3C;
+    }
+    
+    .guide-box {
+        background-color: #e8f5e9;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 20px;
+    }
+    
+    .guide-box h3 {
+        margin-top: 0;
+        font-size: 16px;
+        color: #333;
+    }
+    
+    .guide-box ul {
+        padding-left: 20px;
+        margin-bottom: 0;
+    }
+    
+    .guide-box li {
+        margin-bottom: 8px;
+    }
+    
+    .app-group {
+        margin-bottom: 20px;
+    }
+    
+    .app-group h3 {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    
+    .app-group .app-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 10px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+    
+    .app-group .app-item:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .app-item .app-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        color: #5c6bc0;
+    }
+    
+    .module {
+        margin-bottom: 0 !important;
+    }
+    
+    .module h2,
+    .module caption {
+        background-color: #5c6bc0 !important;
+    }
+</style>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div class="admin-index-container">
+    <div class="admin-panel">
+        <div class="quick-actions">
+            <h3>Acciones rápidas</h3>
+            <div class="action-links">
+                <a href="{% url 'admin:productos_product_add' %}" class="action-btn success">
+                    <i class="fas fa-plus"></i> Añadir producto
+                </a>
+                <a href="{% url 'admin:pedidos_pedido_changelist' %}" class="action-btn">
+                    <i class="fas fa-box"></i> Ver pedidos
+                </a>
+                <a href="{% url 'admin:pedidos_pago_changelist' %}" class="action-btn">
+                    <i class="fas fa-dollar-sign"></i> Ver pagos
+                </a>
+                <a href="/" target="_blank" class="action-btn">
+                    <i class="fas fa-store"></i> Ver tienda
+                </a>
+            </div>
+        </div>
+    
+        <div class="app-section">
+            <div class="app-group">
+                <h3>Gestión de Productos</h3>
+                <div class="app-list">
+                    <a href="{% url 'admin:productos_product_changelist' %}" class="app-item">
+                        <div class="app-icon">📦</div>
+                        <span>Productos</span>
+                    </a>
+                    <a href="{% url 'admin:productos_category_changelist' %}" class="app-item">
+                        <div class="app-icon">📁</div>
+                        <span>Categorías</span>
+                    </a>
+                    <a href="{% url 'admin:productos_review_changelist' %}" class="app-item">
+                        <div class="app-icon">⭐</div>
+                        <span>Reseñas</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="app-group">
+                <h3>Gestión de Ventas</h3>
+                <div class="app-list">
+                    <a href="{% url 'admin:pedidos_pedido_changelist' %}" class="app-item">
+                        <div class="app-icon">🛒</div>
+                        <span>Pedidos</span>
+                    </a>
+                    <a href="{% url 'admin:pedidos_pago_changelist' %}" class="app-item">
+                        <div class="app-icon">💲</div>
+                        <span>Pagos</span>
+                    </a>
+                    <a href="{% url 'admin:pedidos_qrpredefinido_changelist' %}" class="app-item">
+                        <div class="app-icon">📲</div>
+                        <span>QRs de pago</span>
+                    </a>
+                    <a href="{% url 'admin:pedidos_metodoenvio_changelist' %}" class="app-item">
+                        <div class="app-icon">🚚</div>
+                        <span>Métodos de envío</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="app-group">
+                <h3>Gestión de Usuarios</h3>
+                <div class="app-list">
+                    <a href="{% url 'admin:auth_user_changelist' %}" class="app-item">
+                        <div class="app-icon">👥</div>
+                        <span>Usuarios</span>
+                    </a>
+                    <a href="{% url 'admin:pedidos_direccionenvio_changelist' %}" class="app-item">
+                        <div class="app-icon">📍</div>
+                        <span>Direcciones</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-box">
+            <h3>Guía rápida</h3>
+            <ul>
+                <li>Verifica diariamente los <a href="{% url 'admin:pedidos_pedido_changelist' %}?estado__exact=pendiente">pedidos pendientes</a> y los <a href="{% url 'admin:pedidos_pago_changelist' %}?estado__exact=pendiente">pagos por confirmar</a>.</li>
+                <li>Revisa los <a href="{% url 'admin:productos_product_changelist' %}?stock__exact=0">productos sin stock</a> para reponerlos.</li>
+                <li>Las <a href="{% url 'admin:productos_review_changelist' %}?approved__exact=0">reseñas pendientes de aprobación</a> requieren ser revisadas.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="admin-panel">
+        {% if app_list %}
+            <h2>Todas las aplicaciones</h2>
+            {% for app in app_list %}
+                <div class="app module">
+                    <table>
+                        <caption>
+                            <a href="{{ app.app_url }}" class="section" title="{% blocktranslate with name=app.name %}Modelos en la aplicación {{ name }}{% endblocktranslate %}">{{ app.name }}</a>
+                        </caption>
+                        {% for model in app.models %}
+                            <tr class="model-{{ model.object_name|lower }}{% if model.admin_url in request.path %} current-model{% endif %}">
+                                {% if model.admin_url %}
+                                    <th scope="row"><a href="{{ model.admin_url }}"{% if model.admin_url in request.path %} aria-current="page"{% endif %}>{{ model.name }}</a></th>
+                                {% else %}
+                                    <th scope="row">{{ model.name }}</th>
+                                {% endif %}
+                                
+                                {% if model.add_url %}
+                                    <td><a href="{{ model.add_url }}" class="addlink">{% translate "Add" %}</a></td>
+                                {% else %}
+                                    <td></td>
+                                {% endif %}
+                                
+                                {% if model.admin_url and show_changelinks %}
+                                    {% if model.view_only %}
+                                        <td><a href="{{ model.admin_url }}" class="viewlink">{% translate "View" %}</a></td>
+                                    {% else %}
+                                        <td><a href="{{ model.admin_url }}" class="changelink">{% translate "Change" %}</a></td>
+                                    {% endif %}
+                                {% elif show_changelinks %}
+                                    <td></td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No tienes permisos para ver o editar elementos.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Para poder usar iconos de FontAwesome, debemos asegurarnos de que esté cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!document.querySelector('link[href*="font-awesome"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+            document.head.appendChild(link);
+        }
+    });
+</script>
+{% endblock %}

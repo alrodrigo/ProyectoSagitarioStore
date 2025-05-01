@@ -8,12 +8,24 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     {% load static %}
     {% load productos_tags %}
-    {% block pre_common_css %}{% endblock %}
+
+    <!-- CSS Fundamentales (Cargar primero) -->
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+    <link rel="stylesheet" href="{% static 'css/typography.css' %}">
+    <link rel="stylesheet" href="{% static 'css/utilities.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    {% block pre_common_css %}{% endblock %} <!-- Bloque por si necesitas algo antes de common -->
+
+    <!-- CSS Comunes y Componentes -->
     <link rel="stylesheet" href="{% static 'css/common.css' %}">
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}"> <!-- Añadido forms.css aquí -->
     <link rel="stylesheet" href="{% static 'css/notifications.css' %}">
     <link rel="stylesheet" href="{% static 'css/ajax-notifications.css' %}">
-    {% block extra_css %}{% endblock %}
+
+    {% block extra_css %}{% endblock %} <!-- CSS específico de la página -->
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <header class="navbar">
@@ -24,6 +36,7 @@
             
                 <nav class="navbar__nav" id="navbarNav">
                 <a href="{% url 'home' %}" class="navbar__link">Inicio</a>
+                <a href="{% url 'cotizacion' %}" class="navbar__link"><i class="fas fa-clipboard-list"></i> Cotización</a>
                 <div class="dropdown">
                     <button class="dropdown__button">
                         Categorías <i class="fa fa-caret-down"></i>

@@ -3,114 +3,67 @@
 
 {% block title %}Iniciar Sesión - Sagitario Store{% endblock %}
 
-{% block extra_css %}
-<style>
-    .login-container {
-        max-width: 400px;
-        margin: 2rem auto;
-        padding: 2rem;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-        color: var(--text);
-    }
-
-    .form-group input {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 1rem;
-    }
-
-    .btn-login {
-        width: 100%;
-        padding: 0.75rem;
-        background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .btn-login:hover {
-        background: var(--secondary);
-        transform: translateY(-2px);
-    }
-
-    .register-link {
-        text-align: center;
-        margin-top: 1rem;
-    }
-
-    .register-link a {
-        color: var(--primary);
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .register-link a:hover {
-        text-decoration: underline;
-    }
-
-    .alert {
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border-radius: 4px;
-        background: #f8d7da;
-        color: #721c24;
-    }
-</style>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <h1 style="text-align: center; margin-bottom: 2rem;">Iniciar Sesión</h1>
-
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">Iniciar Sesión</h1>
+            <p class="auth-subtitle">Bienvenido de nuevo</p>
         </div>
-        {% endfor %}
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" class="form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}" class="form-label">Email</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}" class="form-label">Contraseña</label>
+                {{ form.password }}
+                {{ form.password.errors }}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+            </div>
+
+            <div class="auth-separator">
+                <span class="auth-separator-text">o</span>
+            </div>
+
+            <div class="social-login">
+                <button type="button" class="social-button social-button--google">
+                    <i class="fab fa-google"></i>
+                    Continuar con Google
+                </button>
+                <button type="button" class="social-button social-button--facebook">
+                    <i class="fab fa-facebook"></i>
+                    Continuar con Facebook
+                </button>
+            </div>
+
+            <div class="auth-footer">
+                ¿No tienes una cuenta? <a href="{% url 'usuarios:register' %}" class="auth-footer-link">Regístrate</a>
+            </div>
+        </form>
     </div>
-    {% endif %}
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-        
-        <div class="form-group">
-            <label for="{{ form.username.id_for_label }}">Email</label>
-            {{ form.username }}
-            {{ form.username.errors }}
-        </div>
-
-        <div class="form-group">
-            <label for="{{ form.password.id_for_label }}">Contraseña</label>
-            {{ form.password }}
-            {{ form.password.errors }}
-        </div>
-
-        <button type="submit" class="btn-login">Iniciar Sesión</button>
-
-        <div class="register-link">
-            ¿No tienes una cuenta? <a href="{% url 'usuarios:register' %}">Regístrate</a>
-        </div>
-    </form>
 </div>
 {% endblock %}

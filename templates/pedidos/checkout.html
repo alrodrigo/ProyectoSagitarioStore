@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% load static %}
+{% load carrito_tags %}
+
+{% block title %}Checkout - Sagitario Store{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h1>Finalizar Compra</h1>
+        <div class="checkout-steps">
+            <div class="step active">
+                <span class="step-number">1</span>
+                <span class="step-label">Envío</span>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <span class="step-label">Pago</span>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <span class="step-label">Confirmación</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="checkout-layout">
+        <main class="checkout-main">
+            <section class="checkout-section">
+                <h2>Información de Envío</h2>
+                
+                {% if addresses %}
+                <div class="saved-addresses">
+                    <h3>Direcciones guardadas</h3>
+                    <div class="address-grid">
+                        {% for address in addresses %}
+                        <div class="address-card {% if address.is_default %}selected{% endif %}">
+                            <input type="radio" name="shipping_address" id="address_{{ address.id }}" value="{{ address.id }}" {% if address.is_default %}checked{% endif %} class="address-radio">
+                            <label for="address_{{ address.id }}" class="address-label">
+                                <div class="address-content">
+                                    <h4>{{ address.alias }}</h4>
+                                    <p>{{ address.recipient_name }}</p>
+                                    <p>{{ address.street_address }}</p>
+                                    <p>{{ address.city }}, {{ address.state }}</p>
+                                    <p>{{ address.phone }}</p>
+                                </div>
+                                {% if address.is_default %}
+                                <span class="default-badge">Predeterminada</span>
+                                {% endif %}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="new-address">
+                    <h3>{% if addresses %}Nueva dirección{% else %}Información de envío{% endif %}</h3>
+                    <form method="post" class="form" id="shipping-form">
+                        {% csrf_token %}
+                        
+                        <div class="form-grid form-grid--2">
+                            <div class="form-group">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label required">Nombre</label>
+                                {{ form.first_name }}
+                                {{ form.first_name.errors }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label required">Apellido</label>
+                                {{ form.last_name }}
+                                {{ form.last_name.errors }}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}" class="form-label required">Email</label>
+                            {{ form.email }}
+                            {{ form.email.errors }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label required">Teléfono</label>
+                            {{ form.phone }}
+                            {{ form.phone.errors }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.street_address.id_for_label }}" class="form-label required">Dirección</label>
+                            {{ form.street_address }}
+                            {{ form.street_address.errors }}
+                        </div>
+
+                        <div class="form-grid form-grid--2">
+                            <div class="form-group">
+                                <label for="{{ form.city.id_for_label }}" class="form-label required">Ciudad</label>
+                                {{ form.city }}
+                                {{ form.city.errors }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.state.id_for_label }}" class="form-label required">Departamento</label>
+                                {{ form.state }}
+                                {{ form.state.errors }}
+                            </div>
+                        </div>
+
+                        {% if user.is_authenticated %}
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" id="save_address" name="save_address" class="form-check-input">
+                                <label for="save_address" class="form-check-label">
+                                    Guardar esta dirección para futuras compras
+                                </label>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </section>
+
+            <section class="checkout-section">
+                <h2>Método de envío</h2>
+                
+                <div class="shipping-methods">
+                    {% for method in shipping_methods %}
+                    <div class="shipping-method">
+                        <input type="radio" name="shipping_method" id="shipping_{{ method.id }}" value="{{ method.id }}" {% if forloop.first %}checked{% endif %} class="shipping-radio">
+                        <label for="shipping_{{ method.id }}" class="shipping-label">
+                            <div class="method-content">
+                                <h4>{{ method.name }}</h4>
+                                <p>{{ method.description }}</p>
+                                <p class="delivery-time">{{ method.delivery_time }}</p>
+                            </div>
+                            <span class="method-price">{{ method.price|currency }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </main>
+
+        <aside class="checkout-sidebar">
+            <div class="order-summary">
+                <h2 class="summary-title">Resumen del pedido</h2>
+                
+                <div class="summary-items">
+                    {% for item in cart_items %}
+                    <div class="summary-item">
+                        <div class="item-image">
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            <span class="item-quantity">{{ item.quantity }}</span>
+                        </div>
+                        <div class="item-details">
+                            <h4 class="item-name">{{ item.product.name }}</h4>
+                            <p class="item-category">{{ item.product.category.name }}</p>
+                        </div>
+                        <div class="item-price">{{ item.get_subtotal|currency }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="summary-content">
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>{{ cart_total|currency }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <span id="shipping-cost">{{ shipping_cost|currency }}</span>
+                    </div>
+                    {% if discount %}
+                    <div class="summary-row discount">
+                        <span>Descuento</span>
+                        <span>-{{ discount|currency }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span>{{ final_total|currency }}</span>
+                </div>
+
+                {% if not discount %}
+                <div class="promo-code">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Código promocional">
+                            <button type="submit" class="btn btn-outline">Aplicar</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+
+                <div class="summary-actions">
+                    <button type="submit" class="btn btn-primary btn-block" form="shipping-form">
+                        Continuar al pago
+                    </button>
+                    <a href="{% url 'carrito:ver_carrito' %}" class="btn btn-outline btn-block">
+                        Volver al carrito
+                    </a>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Actualizar costos de envío al cambiar el método
+    const shippingRadios = document.querySelectorAll('input[name="shipping_method"]');
+    const shippingCost = document.getElementById('shipping-cost');
+    
+    shippingRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            fetch(`/pedidos/shipping-cost/${this.value}/`)
+                .then(response => response.json())
+                .then(data => {
+                    shippingCost.textContent = data.cost;
+                });
+        });
+    });
+    
+    // Toggle entre direcciones guardadas y nueva dirección
+    const savedAddresses = document.querySelectorAll('input[name="shipping_address"]');
+    const newAddressForm = document.querySelector('.new-address');
+    
+    if (savedAddresses.length > 0) {
+        savedAddresses.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'new') {
+                    newAddressForm.style.display = 'block';
+                } else {
+                    newAddressForm.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

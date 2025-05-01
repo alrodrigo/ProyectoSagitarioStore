@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
 import django.utils.timezone
+from django.core.cache import cache
+from django.db.models import Index
 
 User = get_user_model()
 
@@ -22,8 +24,8 @@ class Category(models.Model):
     updated_at = models.DateTimeField('Fecha de actualización', auto_now=True)
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name.lower())  # Aseguramos que el slug esté en minúsculas
+        # Siempre generar/actualizar el slug basado en el nombre actual
+        self.slug = slugify(self.name.lower())  # Aseguramos que el slug esté en minúsculas y actualizado
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
@@ -53,23 +55,41 @@ class Category(models.Model):
         return self.name
 
 class Product(models.Model):
-    name = models.CharField('Nombre', max_length=200)
+    name = models.CharField(max_length=200, db_index=True)
     slug = models.SlugField(unique=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
-    description = models.TextField('Descripción')
+    description = models.TextField()
     details = models.TextField('Detalles del producto', blank=True, null=True)
-    price = models.DecimalField('Precio', max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     original_price = models.DecimalField('Precio original', max_digits=10, decimal_places=2, null=True, blank=True)
-    stock = models.PositiveIntegerField('Stock disponible', default=0)
+    stock = models.IntegerField(default=0)
     image = models.ImageField('Imagen principal', upload_to='products/')
     featured = models.BooleanField('Destacado', default=False)
-    created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
-    updated_at = models.DateTimeField('Fecha de actualización', auto_now=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+            models.Index(fields=['price']),
+            models.Index(fields=['is_active', 'stock']),
+        ]
+        verbose_name = 'Producto'
+        verbose_name_plural = 'Productos'
+        ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
+        # Invalidar caché al guardar
+        cache.delete(f'product_{self.id}')
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Invalidar caché al eliminar
+        cache.delete(f'product_{self.id}')
+        super().delete(*args, **kwargs)
 
     @property
     def discount_percentage(self):
@@ -88,10 +108,9 @@ class Product(models.Model):
     def review_count(self):
         return self.reviews.count()
 
-    class Meta:
-        verbose_name = 'Producto'
-        verbose_name_plural = 'Productos'
-        ordering = ['-created_at']
+    @property
+    def is_available(self):
+        return self.is_active and self.stock > 0
 
     def __str__(self):
         return self.name

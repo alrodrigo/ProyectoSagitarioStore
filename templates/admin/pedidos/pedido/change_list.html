@@ -1,0 +1,165 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Estilos para los elementos de la lista de pedidos */
+    #result_list td, #result_list th {
+        padding: 12px 10px;
+    }
+    
+    #result_list tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+    
+    /* Mostrar estados de pedidos con colores más suaves */
+    .estado-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        color: white;
+        font-weight: 600;
+        font-size: 12px;
+        text-align: center;
+        min-width: 100px;
+    }
+    
+    .estado-pendiente {
+        background-color: #ed8936;
+    }
+    
+    .estado-pagado {
+        background-color: #48bb78;
+    }
+    
+    .estado-en_preparacion {
+        background-color: #4299e1;
+    }
+    
+    .estado-enviado {
+        background-color: #3182ce;
+    }
+    
+    .estado-entregado {
+        background-color: #805ad5;
+    }
+    
+    .estado-cancelado {
+        background-color: #e53e3e;
+    }
+    
+    /* Estilo para totales */
+    .monto {
+        font-weight: 600;
+    }
+
+    /* Mejoras en la interfaz de filtrado */
+    #changelist-filter h2 {
+        background-color: #4a5568;
+        color: white;
+        border-radius: 4px 4px 0 0;
+        padding: 10px 15px;
+        margin-top: 0;
+    }
+    
+    #changelist-filter h3 {
+        font-size: 14px;
+        margin: 15px 0 5px 0;
+        font-weight: 600;
+    }
+    
+    #changelist-filter ul {
+        margin-left: 0;
+        padding-left: 0;
+    }
+    
+    #changelist-filter li {
+        list-style: none;
+        padding: 5px 15px;
+    }
+    
+    #changelist-filter li.selected {
+        background-color: #e8eaf6;
+        border-left: 3px solid #3f51b5;
+        font-weight: 600;
+    }
+    
+    #changelist-filter a {
+        text-decoration: none;
+    }
+
+    /* Mejora del título de la página */
+    #content h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    /* Mejorar estilo para móviles */
+    @media (max-width: 767px) {
+        #changelist-filter {
+            position: static;
+            width: 100%;
+            margin-left: 0;
+            margin-top: 15px;
+        }
+        
+        #changelist .actions {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #changelist .actions select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block result_list %}
+    {% if action_form and actions_on_top and cl.show_admin_actions %}{% admin_actions %}{% endif %}
+    {% result_list cl %}
+    {% if action_form and actions_on_bottom and cl.show_admin_actions %}{% admin_actions %}{% endif %}
+{% endblock %}
+
+{% block result_list_after %}
+<script>
+    // Script para formatear los estados
+    document.addEventListener('DOMContentLoaded', function() {
+        const estadoCells = document.querySelectorAll('td.field-estado, td.field-get_estado_display');
+        
+        estadoCells.forEach(function(cell) {
+            const estado = cell.textContent.trim().toLowerCase();
+            
+            if (estado) {
+                // Convertir texto a código de estado
+                let estadoCode = estado;
+                if (estado === 'pendiente') estadoCode = 'pendiente';
+                else if (estado === 'pagado') estadoCode = 'pagado';
+                else if (estado === 'en preparación') estadoCode = 'en_preparacion';
+                else if (estado === 'enviado') estadoCode = 'enviado';
+                else if (estado === 'entregado') estadoCode = 'entregado';
+                else if (estado === 'cancelado') estadoCode = 'cancelado';
+                
+                // Determinar texto de estado formateado
+                let estadoText = estado.charAt(0).toUpperCase() + estado.slice(1);
+                
+                // Reemplazar el contenido con etiqueta estilizada
+                cell.innerHTML = `<span class="estado-badge estado-${estadoCode}">${estadoText}</span>`;
+            }
+        });
+        
+        // Formatear montos
+        const montoCells = document.querySelectorAll('td.field-total, td.field-monto, td.field-subtotal');
+        montoCells.forEach(function(cell) {
+            const monto = cell.textContent.trim();
+            if (monto && !isNaN(parseFloat(monto))) {
+                cell.innerHTML = `<span class="monto">Bs. ${parseFloat(monto).toFixed(2)}</span>`;
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -8,7 +8,6 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/category-cards.css' %}">
-    <link rel="stylesheet" href="{% static 'css/product-cards.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -84,16 +83,35 @@
         <div class="product-grid">
             {% for product in featured_products %}
                 <article class="product-card">
+                    <!-- Badges -->
+                    <div class="product-card__badges">
+                        {% if product.discount_percentage > 0 %}
+                            <span class="badge badge--discount">-{{ product.discount_percentage }}%</span>
+                        {% endif %}
+                        <!-- Puedes añadir más badges aquí si es necesario -->
+                    </div>
+            
                     <a href="{% url 'productos:producto' product.id %}" class="product-link">
                         <div class="img-product">
                             <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+                            <!-- Acciones Hover -->
+                            <div class="product-card__actions-overlay">
+                                 <!-- Botón Añadir al Carrito (requiere JS para funcionar) -->
+                                 <button type="button" class="btn-icon add-to-cart-btn" data-product-id="{{ product.id }}" aria-label="Añadir al carrito">
+                                     <i class="fas fa-cart-plus"></i>
+                                 </button>
+                                 <!-- Botón Lista de Deseos (requiere JS para funcionar) -->
+                                 <button type="button" class="btn-icon wishlist-btn" data-product-id="{{ product.id }}" aria-label="Añadir a la lista de deseos">
+                                     <i class="far fa-heart"></i> <!-- O fas fa-heart si ya está en la lista -->
+                                 </button>
+                            </div>
                         </div>
                         <div class="product-details">
-                            <h3>{{ product.name }}</h3>
+                            <h3 class="product-title">{{ product.name }}</h3> {# Asegúrate que el h3 tenga esta clase #}
                             <div class="product-price">
-                                <span class="current-price">{{ product.price }} Bs</span>
+                                <span class="current-price">{{ product.price|floatformat:2 }} Bs</span>
                                 {% if product.original_price %}
-                                    <span class="original-price">{{ product.original_price }} Bs</span>
+                                    <span class="original-price">{{ product.original_price|floatformat:2 }} Bs</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -113,16 +131,35 @@
         <div class="product-grid">
             {% for product in latest_products %}
                 <article class="product-card">
+                    <!-- Badges -->
+                    <div class="product-card__badges">
+                        {% if product.discount_percentage > 0 %}
+                            <span class="badge badge--discount">-{{ product.discount_percentage }}%</span>
+                        {% endif %}
+                        <!-- Puedes añadir más badges aquí si es necesario -->
+                    </div>
+            
                     <a href="{% url 'productos:producto' product.id %}" class="product-link">
                         <div class="img-product">
                             <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+                            <!-- Acciones Hover -->
+                            <div class="product-card__actions-overlay">
+                                 <!-- Botón Añadir al Carrito (requiere JS para funcionar) -->
+                                 <button type="button" class="btn-icon add-to-cart-btn" data-product-id="{{ product.id }}" aria-label="Añadir al carrito">
+                                     <i class="fas fa-cart-plus"></i>
+                                 </button>
+                                 <!-- Botón Lista de Deseos (requiere JS para funcionar) -->
+                                 <button type="button" class="btn-icon wishlist-btn" data-product-id="{{ product.id }}" aria-label="Añadir a la lista de deseos">
+                                     <i class="far fa-heart"></i> <!-- O fas fa-heart si ya está en la lista -->
+                                 </button>
+                            </div>
                         </div>
                         <div class="product-details">
-                            <h3>{{ product.name }}</h3>
+                            <h3 class="product-title">{{ product.name }}</h3> {# Asegúrate que el h3 tenga esta clase #}
                             <div class="product-price">
-                                <span class="current-price">{{ product.price }} Bs</span>
+                                <span class="current-price">{{ product.price|floatformat:2 }} Bs</span>
                                 {% if product.original_price %}
-                                    <span class="original-price">{{ product.original_price }} Bs</span>
+                                    <span class="original-price">{{ product.original_price|floatformat:2 }} Bs</span>
                                 {% endif %}
                             </div>
                         </div>

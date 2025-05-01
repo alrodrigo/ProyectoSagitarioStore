@@ -1,0 +1,339 @@
+/* Grid de productos con animaciones y mejor diseño */
+.productos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    padding: 2rem 0;
+}
+
+/* Tarjeta de producto mejorada */
+.producto-card {
+    position: relative;
+    background: white;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    transition: var(--transition-all);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: var(--shadow-sm);
+}
+
+.producto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* Contenedor de imagen con efecto hover */
+.producto-imagen {
+    position: relative;
+    padding-bottom: 100%;
+    background: var(--background-alt);
+    overflow: hidden;
+}
+
+.producto-imagen img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: var(--transition-transform);
+}
+
+.producto-card:hover .producto-imagen img {
+    transform: scale(1.05);
+}
+
+/* Overlay con acciones rápidas */
+.producto-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.5));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: var(--transition-opacity);
+}
+
+.producto-card:hover .producto-overlay {
+    opacity: 1;
+}
+
+.acciones-rapidas {
+    display: flex;
+    gap: 1rem;
+    transform: translateY(20px);
+    transition: var(--transition-transform);
+}
+
+.producto-card:hover .acciones-rapidas {
+    transform: translateY(0);
+}
+
+.accion-btn {
+    background: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: var(--transition-all);
+    box-shadow: var(--shadow-md);
+}
+
+.accion-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Badges y estados */
+.producto-badges {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 1;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.badge-nuevo {
+    background: var(--primary);
+    color: white;
+}
+
+.badge-descuento {
+    background: var(--discount-color);
+    color: white;
+}
+
+.badge-agotado {
+    background: var(--error);
+    color: white;
+}
+
+/* Detalles del producto */
+.producto-detalles {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+}
+
+.producto-categoria {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.producto-nombre {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-dark);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+.producto-precio {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-top: auto;
+}
+
+.precio-actual {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--price-color);
+}
+
+.precio-anterior {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    font-size: var(--font-size-sm);
+}
+
+.descuento-tag {
+    font-size: var(--font-size-sm);
+    color: var(--discount-color);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Rating y reviews */
+.producto-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.estrellas {
+    color: #ffd700;
+    display: flex;
+    gap: 0.2rem;
+}
+
+.num-reviews {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+}
+
+/* Botón de agregar al carrito */
+.btn-agregar {
+    width: 100%;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    font-weight: var(--font-weight-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition-transform);
+}
+
+.btn-agregar:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Stock status */
+.stock-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--font-size-sm);
+}
+
+.stock-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.en-stock .stock-dot {
+    background: var(--success);
+}
+
+.bajo-stock .stock-dot {
+    background: var(--warning);
+}
+
+.agotado .stock-dot {
+    background: var(--error);
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.producto-card {
+    animation: fadeInUp 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .productos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .producto-detalles {
+        padding: 1rem;
+    }
+
+    .producto-nombre {
+        font-size: var(--font-size-base);
+    }
+
+    .precio-actual {
+        font-size: var(--font-size-lg);
+    }
+
+    .acciones-rapidas {
+        display: none;
+    }
+}
+
+/* Filtros y ordenamiento */
+.filtros-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.filtros-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.filtros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filtro-label {
+    font-weight: var(--font-weight-medium);
+    color: var(--text-dark);
+}
+
+.filtro-select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: white;
+    color: var(--text);
+    cursor: pointer;
+    transition: var(--transition-colors);
+}
+
+.filtro-select:hover {
+    border-color: var(--primary);
+}

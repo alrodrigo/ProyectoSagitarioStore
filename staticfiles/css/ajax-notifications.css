@@ -1,0 +1,61 @@
+/* Estilos para notificaciones AJAX */
+.notification {
+    position: fixed;
+    top: 85px;
+    right: 20px;
+    z-index: 9999;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: white;
+    max-width: 350px;
+    transform: translateX(110%);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background-color: #28a745;
+    border-left: 5px solid #1e7e34;
+}
+
+.notification.error {
+    background-color: #dc3545;
+    border-left: 5px solid #bd2130;
+}
+
+.notification.warning {
+    background-color: #ffc107;
+    color: #333;
+    border-left: 5px solid #d39e00;
+}
+
+.notification.info {
+    background-color: #17a2b8;
+    border-left: 5px solid #117a8b;
+}
+
+.notification i {
+    margin-right: 8px;
+}
+
+/* Animación para el contador del carrito */
+.cart-count.updated {
+    animation: bounce 0.8s ease;
+    background-color: #ff5722 !important;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.4);
+    }
+}

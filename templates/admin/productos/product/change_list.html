@@ -1,0 +1,220 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Estilos para la lista de productos */
+    #result_list td, #result_list th {
+        padding: 12px 10px;
+    }
+    
+    #result_list tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+    
+    /* Estilo mejorado para las imágenes */
+    .product-image {
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    
+    .product-image:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Estilo para precios */
+    .product-price {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    /* Estilo para stock */
+    .stock-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .stock-normal {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+    }
+    
+    .stock-bajo {
+        background-color: #fff3e0;
+        color: #ef6c00;
+    }
+    
+    .stock-agotado {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+    
+    /* Estilo para producto destacado */
+    .featured-badge {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        border-radius: 50%;
+        color: white;
+        background-color: #ffc107;
+    }
+    
+    /* Mejoras en la interfaz de filtrado */
+    #changelist-filter {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    #changelist-filter h2 {
+        background-color: #5c6bc0;
+        color: white;
+        border-radius: 4px 4px 0 0;
+        padding: 12px 15px;
+        margin-top: 0;
+    }
+    
+    #changelist-filter h3 {
+        font-size: 14px;
+        margin: 15px 0 5px 12px;
+        font-weight: 600;
+    }
+    
+    #changelist-filter ul {
+        margin-left: 0;
+        padding-left: 0;
+    }
+    
+    #changelist-filter li {
+        list-style: none;
+        padding: 5px 15px;
+    }
+    
+    #changelist-filter li.selected {
+        background-color: #e8eaf6;
+        border-left: 3px solid #3f51b5;
+        font-weight: 600;
+    }
+    
+    /* Mejoras generales en la interfaz */
+    #changelist .actions {
+        padding: 15px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    
+    #changelist .actions select {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+    
+    #changelist .actions button {
+        background-color: #5c6bc0;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    
+    #changelist .actions button:hover {
+        background-color: #3f51b5;
+    }
+    
+    /* Mejorar estilo para móviles */
+    @media (max-width: 767px) {
+        #changelist-filter {
+            position: static;
+            width: 100%;
+            margin-left: 0;
+            margin-top: 15px;
+        }
+        
+        #changelist .actions {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #changelist .actions select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block result_list %}
+    {% if action_form and actions_on_top and cl.show_admin_actions %}{% admin_actions %}{% endif %}
+    {% result_list cl %}
+    {% if action_form and actions_on_bottom and cl.show_admin_actions %}{% admin_actions %}{% endif %}
+{% endblock %}
+
+{% block result_list_after %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mejorar visualización de imágenes
+        const imageCells = document.querySelectorAll('td.field-main_image img');
+        imageCells.forEach(function(img) {
+            img.classList.add('product-image');
+            img.style.width = '60px';
+            img.style.height = '60px';
+            img.style.objectFit = 'cover';
+        });
+        
+        // Formatear precios
+        const priceCells = document.querySelectorAll('td.field-price');
+        priceCells.forEach(function(cell) {
+            const price = cell.textContent.trim();
+            if (price && !isNaN(parseFloat(price))) {
+                cell.innerHTML = `<span class="product-price">Bs. ${parseFloat(price).toFixed(2)}</span>`;
+            }
+        });
+        
+        // Formatear stock
+        const stockCells = document.querySelectorAll('td.field-stock');
+        stockCells.forEach(function(cell) {
+            const stock = parseInt(cell.textContent.trim());
+            if (!isNaN(stock)) {
+                let stockClass = 'stock-normal';
+                let stockMessage = stock;
+                
+                if (stock === 0) {
+                    stockClass = 'stock-agotado';
+                } else if (stock <= 5) {
+                    stockClass = 'stock-bajo';
+                }
+                
+                cell.innerHTML = `<span class="stock-badge ${stockClass}">${stockMessage}</span>`;
+            }
+        });
+        
+        // Formatear featured
+        const featuredCells = document.querySelectorAll('td.field-featured');
+        featuredCells.forEach(function(cell) {
+            const isFeatured = cell.querySelector('img[alt="True"]');
+            if (isFeatured) {
+                cell.innerHTML = `<span class="featured-badge" title="Producto destacado"><i class="fas fa-star"></i></span>`;
+            }
+        });
+        
+        // Asegurarse de tener Font Awesome
+        if (!document.querySelector('link[href*="font-awesome"]')) {
+            const fontAwesome = document.createElement('link');
+            fontAwesome.rel = 'stylesheet';
+            fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+            document.head.appendChild(fontAwesome);
+        }
+    });
+</script>
+{% endblock %}

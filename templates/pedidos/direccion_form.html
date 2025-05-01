@@ -4,38 +4,7 @@
 {% block title %}{% if edit_mode %}Editar{% else %}Añadir{% endif %} Dirección - Sagitario Store{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/forms.css' %}">
-<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
-<style>
-    .address-form-container {
-        max-width: 600px;
-        margin: 2rem auto;
-        padding: 1.5rem;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .form-header {
-        margin-bottom: 1.5rem;
-        text-align: center;
-    }
-    
-    .form-header h1 {
-        margin-bottom: 0.5rem;
-        color: #333;
-    }
-    
-    .form-header p {
-        color: #666;
-    }
-    
-    .form-actions {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 1.5rem;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/pedidos/forms.css' %}">
 {% endblock %}
 
 {% block content %}

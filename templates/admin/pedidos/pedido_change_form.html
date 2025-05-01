@@ -1,0 +1,519 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Estilos para tarjetas de acción - Centrar en la página */
+    .action-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin: 20px auto;
+        padding: 20px;
+        max-width: 900px;
+        width: 100%;
+    }
+    
+    /* Mantenemos los estilos originales pero actualizamos los colores */
+    .card-header {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 10px;
+    }
+    
+    .card-header h3 {
+        margin: 0;
+        font-size: 18px;
+        color: #2d3748;
+        font-weight: 600;
+    }
+    
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .btn {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Actualizar colores a una paleta más suave */
+    .btn-success { background-color: #48bb78; }
+    .btn-success:hover { background-color: #38a169; }
+    
+    .btn-info { background-color: #4299e1; }
+    .btn-info:hover { background-color: #3182ce; }
+    
+    .btn-primary { background-color: #3182ce; }
+    .btn-primary:hover { background-color: #2b6cb0; }
+    
+    .btn-purple { background-color: #805ad5; }
+    .btn-purple:hover { background-color: #6b46c1; }
+    
+    .btn-danger { background-color: #e53e3e; }
+    .btn-danger:hover { background-color: #c53030; }
+    
+    .btn-secondary { background-color: #718096; }
+    .btn-secondary:hover { background-color: #4a5568; }
+    
+    .btn-whatsapp { background-color: #25D366; }
+    .btn-whatsapp:hover { background-color: #128C7E; }
+    
+    .section-divider {
+        margin: 20px 0;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 20px;
+    }
+    
+    /* Formulario de seguimiento */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .form-check {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+    
+    .form-check input[type=checkbox] {
+        margin-right: 8px;
+    }
+    
+    /* Estilos para dispositivos móviles */
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+        }
+    }
+    
+    /* Estado actual del pedido - Actualizado con colores más suaves */
+    .pedido-estado-actual {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 6px;
+        color: white;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    
+    .estado-pendiente { background-color: #ed8936; }
+    .estado-pagado { background-color: #48bb78; }
+    .estado-en_preparacion { background-color: #4299e1; }
+    .estado-enviado { background-color: #3182ce; }
+    .estado-entregado { background-color: #805ad5; }
+    .estado-cancelado { background-color: #e53e3e; }
+    
+    /* Centrar y mejorar la tabla de elementos del pedido */
+    .field-related_widget {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    /* Estilos para tablas inline (tabla de productos del pedido) */
+    .inline-group {
+        max-width: 900px;
+        margin: 20px auto !important;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .inline-group h2 {
+        background-color: #4a5568 !important;
+        color: white !important;
+        padding: 12px 15px !important;
+        margin: 0 !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+    }
+    
+    .inline-group .tabular {
+        width: 100%;
+        overflow-x: auto;
+    }
+    
+    .inline-group .tabular table {
+        width: 100%;
+    }
+    
+    .inline-group .tabular tr.form-row {
+        display: table-row;
+    }
+    
+    .inline-group .tabular td {
+        padding: 10px !important;
+    }
+    
+    .inline-group .tabular .original {
+        padding: 10px !important;
+    }
+    
+    /* Mejorar el formulario principal */
+    .form-row {
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    fieldset.module {
+        max-width: 900px !important;
+        margin: 20px auto !important;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .submit-row {
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Solución más específica para centrar/alinear a la izquierda la tabla de productos */
+    .inline-related {
+        max-width: 900px !important;
+        margin-left: 0 !important;
+        margin-right: auto !important;
+        width: 100% !important;
+    }
+    
+    /* Forzar el contenedor de inlines a reposicionarse */
+    div.inline-group {
+        position: relative !important;
+        left: 0 !important;
+        width: 100% !important;
+        max-width: 900px !important;
+        margin: 20px 0 !important;
+        float: none !important;
+        clear: both !important;
+    }
+    
+    /* Forzar ancho total de la tabla */
+    .inline-related table {
+        width: 100% !important;
+        max-width: 900px !important;
+    }
+    
+    /* Ajustar el contenedor principal del formulario */
+    #content-main form {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    /* Asegurar que el fieldset esté alineado a la izquierda */
+    fieldset.module {
+        margin-left: 0 !important;
+        margin-right: auto !important;
+    }
+    
+    /* Limitar ancho del contenedor principal */
+    #content-main {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    
+    /* Eliminar desplazamientos hacia la derecha */
+    .field-box, .aligned .form-row > div {
+        margin-right: 0 !important;
+    }
+    
+    /* Ajustes adicionales para la tabla de inlines en dispositivos pequeños */
+    @media (max-width: 1024px) {
+        .inline-group {
+            overflow-x: auto;
+            width: 100% !important;
+        }
+    }
+    
+    /* CORRECCIÓN: Forzar el contenido principal a estar centrado y limitar su ancho */
+    #content {
+        max-width: 1200px;
+        margin: 0 auto !important;
+        padding: 20px;
+    }
+    
+    /* CORRECCIÓN: Asegurar que el contenedor principal esté centrado */
+    #content-main {
+        float: none !important;
+        width: 100% !important;
+        clear: both;
+    }
+    
+    /* CORRECCIÓN: Forzar alineación y ancho de elementos inline */
+    .inline-group {
+        max-width: 900px !important;
+        margin: 20px auto !important;
+        float: none !important;
+        clear: both !important;
+        width: 100% !important;
+    }
+    
+    /* CORRECCIÓN: Eliminar margen y padding excesivos en inlines */
+    .inline-related {
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    
+    /* CORRECCIÓN: Ancho completo para las tablas dentro de inlines */
+    .inline-related table {
+        width: 100% !important;
+    }
+    
+    /* CORRECCIÓN: Alinear elementos del formulario principal */
+    .form-row {
+        max-width: 900px !important;
+        margin: 0 auto 10px auto !important;
+        padding: 8px 0 !important;
+        width: 100% !important;
+    }
+    
+    /* CORRECCIÓN: Forzar alineación de fieldsets */
+    fieldset.module {
+        margin: 10px auto !important;
+        max-width: 900px !important;
+        width: 100% !important;
+        float: none !important;
+    }
+    
+    /* CORRECCIÓN: Ajustar el ancho de los contenedores de campo */
+    .field-box {
+        float: left;
+        margin-right: 20px;
+        width: calc(50% - 20px);
+    }
+    
+    /* CORRECCIÓN: Eliminar márgenes adicionales en contenedores de campos */
+    .aligned label + div {
+        display: inline-block;
+        float: none !important;
+    }
+    
+    /* CORRECCIÓN: Eliminar desbordamiento horizontal */
+    .aligned .form-row > div {
+        width: auto !important;
+        overflow: hidden !important;
+    }
+    
+    /* CORRECCIÓN: Estilo para tablas inline */
+    .tabular td.original {
+        width: 1px !important;
+        padding-right: 0 !important;
+    }
+    
+    /* CORRECCIÓN: Alineación en dispositivos móviles */
+    @media (max-width: 767px) {
+        .field-box {
+            width: 100%;
+            float: none;
+            margin-right: 0;
+        }
+        
+        .aligned .form-row > div {
+            width: 100% !important;
+        }
+    }
+    
+    /* CORRECCIÓN: Estilo para botones de acción */
+    .submit-row {
+        background: transparent !important;
+        border: none !important;
+        margin: 20px auto !important;
+        max-width: 900px !important;
+        text-align: right !important;
+        padding: 0 !important;
+    }
+    
+    /* CORRECCIÓN: Mostrar el selector de objeto en línea correctamente */
+    .selector {
+        width: 100% !important;
+        max-width: 880px !important; 
+        margin: 0 auto !important;
+    }
+    
+    .selector select {
+        width: 100% !important;
+        max-width: 400px !important;
+    }
+    
+    .selector-available, .selector-chosen {
+        width: 48% !important;
+        max-width: 430px !important;
+    }
+    
+    /* CORRECCIÓN: Arreglar visualización en Safari y Chrome */
+    .module h2 {
+        padding: 10px !important;
+        background-color: #4a5568 !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <div class="action-card">
+        <div class="card-header">
+            <h3>Estado Actual: 
+                <span class="pedido-estado-actual estado-{{ original.estado }}">
+                    {{ original.get_estado_display }}
+                </span>
+            </h3>
+        </div>
+        
+        <div class="card-header">
+            <h3>Cambiar Estado</h3>
+        </div>
+        <div class="btn-group">
+            {% if original.estado != 'pagado' %}
+            <a href="{% url 'admin:pedido-cambiar-estado' object_id=original.pk estado='pagado' %}" 
+               class="btn btn-success">
+                <i class="fas fa-check-circle"></i> Pagado
+            </a>
+            {% endif %}
+            
+            {% if original.estado != 'en_preparacion' and original.estado == 'pagado' %}
+            <a href="{% url 'admin:pedido-cambiar-estado' object_id=original.pk estado='en_preparacion' %}" 
+               class="btn btn-info">
+                <i class="fas fa-box-open"></i> En Preparación
+            </a>
+            {% endif %}
+            
+            {% if original.estado != 'enviado' and original.estado in 'pagado,en_preparacion' %}
+            <a href="{% url 'admin:pedido-cambiar-estado' object_id=original.pk estado='enviado' %}" 
+               class="btn btn-primary">
+                <i class="fas fa-shipping-fast"></i> Enviado
+            </a>
+            {% endif %}
+            
+            {% if original.estado != 'entregado' and original.estado == 'enviado' %}
+            <a href="{% url 'admin:pedido-cambiar-estado' object_id=original.pk estado='entregado' %}" 
+               class="btn btn-purple">
+                <i class="fas fa-clipboard-check"></i> Entregado
+            </a>
+            {% endif %}
+            
+            {% if original.estado != 'cancelado' and original.estado != 'entregado' %}
+            <a href="{% url 'admin:pedido-cambiar-estado' object_id=original.pk estado='cancelado' %}" 
+               class="btn btn-danger">
+                <i class="fas fa-ban"></i> Cancelado
+            </a>
+            {% endif %}
+        </div>
+        
+        {% if original.estado == 'pagado' or original.estado == 'enviado' or original.estado == 'en_preparacion' %}
+        <div class="section-divider">
+            <div class="card-header">
+                <h3>Notificaciones WhatsApp</h3>
+            </div>
+            <div class="btn-group">
+                <a href="{% url 'admin:pedido-enviar-whatsapp' object_id=original.pk %}" 
+                   class="btn btn-whatsapp">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"></path>
+                    </svg>
+                    {% if original.estado == 'pagado' %}
+                        Enviar notificación de pago confirmado
+                    {% elif original.estado == 'enviado' %}
+                        Enviar notificación de envío
+                    {% elif original.estado == 'en_preparacion' %}
+                        Enviar notificación de preparación
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Formulario para agregar seguimiento manual -->
+        <div class="section-divider">
+            <div class="card-header">
+                <h3>Agregar Seguimiento Manual</h3>
+            </div>
+            <form method="post" action="{% url 'admin:pedido-agregar-seguimiento' object_id=original.pk %}">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="descripcion_seguimiento">Descripción:</label>
+                        <textarea id="descripcion_seguimiento" name="descripcion" rows="3" class="form-control" placeholder="Describe el estado actual del pedido..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="estado_seguimiento">Estado:</label>
+                        <select id="estado_seguimiento" name="estado" class="form-control">
+                            {% for value, label in original.ESTADO_CHOICES %}
+                                <option value="{{ value }}" {% if value == original.estado %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-check">
+                            <input type="checkbox" id="enviar_whatsapp" name="enviar_whatsapp">
+                            <label for="enviar_whatsapp">Enviar notificación WhatsApp</label>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-plus-circle"></i> Agregar Seguimiento
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+<script>
+    // Agregar íconos de FontAwesome si no están ya incluidos
+    if (!document.querySelector('link[href*="font-awesome"]')) {
+        const fontAwesomeLink = document.createElement('link');
+        fontAwesomeLink.rel = 'stylesheet';
+        fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        document.head.appendChild(fontAwesomeLink);
+    }
+</script>
+{% endblock %}

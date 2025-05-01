@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import get_user_model, authenticate
+from .models import Perfil
 
 User = get_user_model()
 
@@ -20,6 +21,24 @@ class CustomUserCreationForm(UserCreationForm):
         required=True,
         widget=forms.EmailInput(attrs={'placeholder': 'Correo electrónico'})
     )
+    ci = forms.CharField(
+        label='Cédula de Identidad',
+        max_length=20, 
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'CI (ej: 1234567)'})
+    )
+    telefono = forms.CharField(
+        label='Número de teléfono',
+        max_length=20, 
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Teléfono (ej: 70123456)'})
+    )
+    ciudad_residencia = forms.CharField(
+        label='Ciudad de residencia',
+        max_length=100, 
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Ciudad donde vives'})
+    )
     password1 = forms.CharField(
         widget=forms.PasswordInput(attrs={'placeholder': 'Contraseña'})
     )
@@ -33,7 +52,7 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'password1', 'password2')
+        fields = ('first_name', 'last_name', 'email', 'ci', 'telefono', 'ciudad_residencia', 'password1', 'password2')
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -45,8 +64,16 @@ class CustomUserCreationForm(UserCreationForm):
         user = super().save(commit=False)
         user.username = self.cleaned_data['email']  # Usar el email como username
         user.email = self.cleaned_data['email']
+        
         if commit:
             user.save()
+            # Actualizar el perfil del usuario con los datos adicionales
+            perfil = user.perfil
+            perfil.ci = self.cleaned_data['ci']
+            perfil.telefono = self.cleaned_data['telefono']
+            perfil.ciudad_residencia = self.cleaned_data['ciudad_residencia']
+            perfil.save()
+            
         return user
 
 class CustomAuthenticationForm(AuthenticationForm):

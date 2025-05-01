@@ -1,0 +1,312 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+<style>
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .dashboard-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-card h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #333;
+        font-size: 18px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+    
+    .stat-container {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    
+    .stat-box {
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        width: calc(50% - 10px);
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .stat-box.primary {
+        background-color: #e3f2fd;
+    }
+    
+    .stat-box.success {
+        background-color: #e8f5e9;
+    }
+    
+    .stat-box.warning {
+        background-color: #fffde7;
+    }
+    
+    .stat-box.danger {
+        background-color: #ffebee;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        color: #555;
+    }
+    
+    .action-links {
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .action-link {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #5c6bc0;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: background-color 0.2s;
+    }
+    
+    .action-link:hover {
+        background-color: #3f51b5;
+    }
+    
+    .table-container {
+        margin-top: 15px;
+    }
+    
+    .dashboard-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .dashboard-table th,
+    .dashboard-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .dashboard-table th {
+        background-color: #f5f5f5;
+    }
+    
+    .dashboard-card .icon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+        color: rgba(0,0,0,0.1);
+    }
+    
+    .guia-container {
+        margin-top: 30px;
+    }
+    
+    .guia-item {
+        margin-bottom: 20px;
+    }
+    
+    .guia-item h4 {
+        margin-bottom: 8px;
+        font-size: 16px;
+    }
+    
+    .guia-item p {
+        margin: 0 0 10px;
+        color: #555;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .stat-box {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Resumen de Inventario -->
+    <div class="dashboard-card">
+        <div class="icon">📦</div>
+        <h3>Inventario</h3>
+        <div class="stat-container">
+            <div class="stat-box primary">
+                <div class="stat-value">{{ total_productos }}</div>
+                <div class="stat-label">Productos</div>
+            </div>
+            <div class="stat-box warning">
+                <div class="stat-value">{{ productos_sin_stock }}</div>
+                <div class="stat-label">Sin Stock</div>
+            </div>
+            <div class="stat-box success">
+                <div class="stat-value">{{ total_categorias }}</div>
+                <div class="stat-label">Categorías</div>
+            </div>
+        </div>
+        <div class="action-links">
+            <a href="{% url 'admin:productos_product_changelist' %}" class="action-link">Ver productos</a>
+            <a href="{% url 'admin:productos_category_changelist' %}" class="action-link">Ver categorías</a>
+            <a href="{% url 'admin:productos_product_add' %}" class="action-link">Añadir producto</a>
+        </div>
+    </div>
+    
+    <!-- Resumen de Pedidos -->
+    <div class="dashboard-card">
+        <div class="icon">🛒</div>
+        <h3>Pedidos</h3>
+        <div class="stat-container">
+            <div class="stat-box primary">
+                <div class="stat-value">{{ total_pedidos }}</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-box warning">
+                <div class="stat-value">{{ pedidos_pendientes }}</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-box success">
+                <div class="stat-value">{{ pedidos_hoy }}</div>
+                <div class="stat-label">Hoy</div>
+            </div>
+            <div class="stat-box primary">
+                <div class="stat-value">{{ pedidos_mes }}</div>
+                <div class="stat-label">Este mes</div>
+            </div>
+        </div>
+        <div class="action-links">
+            <a href="{% url 'admin:pedidos_pedido_changelist' %}" class="action-link">Ver pedidos</a>
+            <a href="{% url 'admin:pedidos_pago_changelist' %}" class="action-link">Ver pagos</a>
+        </div>
+    </div>
+    
+    <!-- Resumen de Ventas -->
+    <div class="dashboard-card">
+        <div class="icon">💰</div>
+        <h3>Ventas</h3>
+        <div class="stat-container">
+            <div class="stat-box success">
+                <div class="stat-value">Bs. {{ ventas_mes|floatformat:2 }}</div>
+                <div class="stat-label">Ventas del mes</div>
+            </div>
+            <div class="stat-box primary">
+                <div class="stat-value">Bs. {{ ventas_promedio|floatformat:2 }}</div>
+                <div class="stat-label">Pedido promedio</div>
+            </div>
+        </div>
+        <div class="action-links">
+            <a href="{% url 'admin:pedidos_pedido_changelist' %}?estado__exact=enviado" class="action-link">Ver ventas completadas</a>
+        </div>
+    </div>
+    
+    <!-- Resumen de Usuarios -->
+    <div class="dashboard-card">
+        <div class="icon">👥</div>
+        <h3>Usuarios</h3>
+        <div class="stat-container">
+            <div class="stat-box primary">
+                <div class="stat-value">{{ total_usuarios }}</div>
+                <div class="stat-label">Total usuarios</div>
+            </div>
+            <div class="stat-box success">
+                <div class="stat-value">{{ usuarios_nuevos_mes }}</div>
+                <div class="stat-label">Nuevos este mes</div>
+            </div>
+        </div>
+        <div class="action-links">
+            <a href="{% url 'admin:auth_user_changelist' %}" class="action-link">Ver usuarios</a>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de pedidos recientes -->
+<div class="dashboard-card">
+    <h3>Pedidos Recientes</h3>
+    <div class="table-container">
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos_recientes %}
+                <tr>
+                    <td>{{ pedido.id }}</td>
+                    <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.email }}</td>
+                    <td>{{ pedido.get_estado_display }}</td>
+                    <td>Bs. {{ pedido.total }}</td>
+                    <td>{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'admin:pedidos_pedido_change' pedido.id %}" class="action-link">Ver</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No hay pedidos recientes</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Guía rápida para administradores -->
+<div class="dashboard-card guia-container">
+    <h3>Guía rápida para administradores</h3>
+    
+    <div class="guia-item">
+        <h4>Gestión de Productos</h4>
+        <p>Para añadir un nuevo producto, haz clic en "Añadir producto" y completa todos los campos obligatorios. No olvides añadir imágenes de buena calidad y especificar el stock disponible.</p>
+        <p>Recuerda revisar regularmente los productos sin stock para reponerlos o marcarlos como no disponibles.</p>
+    </div>
+    
+    <div class="guia-item">
+        <h4>Gestión de Pedidos</h4>
+        <p>Los pedidos nuevos aparecen con estado "Pendiente". Una vez que confirmes el pago, cámbialo a "Pagado" y luego a "En preparación" cuando empieces a procesarlo.</p>
+        <p>Cuando envíes el pedido, cámbialo a "Enviado" y añade información de seguimiento si está disponible.</p>
+    </div>
+    
+    <div class="guia-item">
+        <h4>Gestión de Pagos</h4>
+        <p>Los pagos se procesan automáticamente, pero debes verificar los comprobantes subidos por los clientes y marcarlos como "Completado" una vez validados.</p>
+    </div>
+    
+    <div class="guia-item">
+        <h4>Cotizaciones</h4>
+        <p>Las solicitudes de cotización llegarán a tu WhatsApp. Asegúrate de responder rápidamente para aumentar las posibilidades de conversión.</p>
+    </div>
+</div>
+
+{% endblock %}

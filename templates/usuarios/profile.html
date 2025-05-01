@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mi Perfil - Sagitario Store{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-layout">
+        <aside class="profile-sidebar">
+            <nav class="profile-nav">
+                <a href="#personal-info" class="nav-link active">
+                    <i class="fas fa-user"></i>
+                    Información Personal
+                </a>
+                <a href="#addresses" class="nav-link">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Mis Direcciones
+                </a>
+                <a href="#orders" class="nav-link">
+                    <i class="fas fa-box"></i>
+                    Mis Pedidos
+                </a>
+                <a href="#settings" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    Configuración
+                </a>
+            </nav>
+        </aside>
+
+        <main class="profile-content">
+            <section id="personal-info" class="profile-section">
+                <div class="profile-header">
+                    <h2>Información Personal</h2>
+                    <p>Actualiza tu información personal y de contacto</p>
+                </div>
+
+                <form method="post" class="form">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+
+                    <div class="form-grid form-grid--2">
+                        <div class="form-group">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">Nombre</label>
+                            {{ form.first_name }}
+                            {{ form.first_name.errors }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">Apellido</label>
+                            {{ form.last_name }}
+                            {{ form.last_name.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                        {{ form.email }}
+                        {{ form.email.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.phone.id_for_label }}" class="form-label">Teléfono</label>
+                        {{ form.phone }}
+                        {{ form.phone.errors }}
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </section>
+
+            <section id="addresses" class="profile-section">
+                <div class="profile-header">
+                    <h2>Mis Direcciones</h2>
+                    <p>Administra tus direcciones de envío</p>
+                </div>
+
+                <div class="addresses-list">
+                    {% for address in addresses %}
+                    <div class="address-card">
+                        {% if address.is_default %}
+                        <span class="default-badge">Predeterminada</span>
+                        {% endif %}
+                        <div class="address-content">
+                            <h3>{{ address.alias }}</h3>
+                            <p>{{ address.recipient_name }}</p>
+                            <p>{{ address.street_address }}</p>
+                            <p>{{ address.city }}, {{ address.state }}</p>
+                            <p>{{ address.phone }}</p>
+                        </div>
+                        <div class="address-actions">
+                            <button class="btn btn-outline btn-sm">Editar</button>
+                            {% if not address.is_default %}
+                            <button class="btn btn-outline btn-sm">Eliminar</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h3>No tienes direcciones guardadas</h3>
+                        <p>Agrega una dirección para agilizar tus compras</p>
+                        <button class="btn btn-primary">Agregar Dirección</button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section id="orders" class="profile-section">
+                <div class="profile-header">
+                    <h2>Historial de Pedidos</h2>
+                    <p>Revisa el estado de tus pedidos</p>
+                </div>
+
+                <div class="order-list">
+                    {% for order in orders %}
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <span class="order-number">Pedido #{{ order.number }}</span>
+                                <span class="order-date">{{ order.created_at|date:"d/m/Y" }}</span>
+                            </div>
+                            <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+                        </div>
+
+                        <div class="order-content">
+                            <div class="order-items">
+                                {% for item in order.items.all %}
+                                <div class="order-item">
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="item-image">
+                                    <div class="item-details">
+                                        <h4 class="item-name">{{ item.product.name }}</h4>
+                                        <span class="item-quantity">Cantidad: {{ item.quantity }}</span>
+                                        <span class="item-price">{{ item.get_subtotal }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="order-summary">
+                                <div class="summary-row">
+                                    <span>Subtotal:</span>
+                                    <span>{{ order.subtotal }}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Envío:</span>
+                                    <span>{{ order.shipping_cost }}</span>
+                                </div>
+                                <div class="summary-total">
+                                    <span>Total:</span>
+                                    <span>{{ order.total }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="order-footer">
+                            <button class="btn btn-outline btn-sm">Ver Detalles</button>
+                            {% if order.status == 'pending' %}
+                            <button class="btn btn-primary btn-sm">Pagar Ahora</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <h3>No tienes pedidos</h3>
+                        <p>¡Explora nuestra tienda y haz tu primer pedido!</p>
+                        <a href="{% url 'home' %}" class="btn btn-primary">Ir a la Tienda</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section id="settings" class="profile-section">
+                <div class="profile-header">
+                    <h2>Configuración</h2>
+                    <p>Ajusta las preferencias de tu cuenta</p>
+                </div>
+
+                <form class="form">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" id="newsletter" name="newsletter" class="form-check-input">
+                            <label for="newsletter" class="form-check-label">
+                                Recibir notificaciones por email sobre ofertas y novedades
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" id="whatsapp" name="whatsapp" class="form-check-input">
+                            <label for="whatsapp" class="form-check-label">
+                                Recibir notificaciones por WhatsApp sobre mis pedidos
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar Preferencias</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.profile-nav .nav-link');
+        const sections = document.querySelectorAll('.profile-section');
+
+        // Ocultar todas las secciones excepto la primera
+        sections.forEach((section, index) => {
+            if (index !== 0) section.style.display = 'none';
+        });
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remover clase active de todos los links
+                navLinks.forEach(l => l.classList.remove('active'));
+                
+                // Agregar clase active al link clickeado
+                this.classList.add('active');
+                
+                // Obtener el id de la sección a mostrar
+                const targetId = this.getAttribute('href').substring(1);
+                
+                // Ocultar todas las secciones
+                sections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Mostrar la sección seleccionada
+                document.getElementById(targetId).style.display = 'block';
+            });
+        });
+    });
+</script>
+{% endblock %}
