@@ -10,6 +10,10 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
     
+    # Lista de deseos
+    path('wishlist/toggle/', views.toggle_lista_deseos, name='toggle_lista_deseos'),
+    path('wishlist/', views.mi_lista_deseos, name='mi_lista_deseos'),
+    
     # Password reset URLs
     path('password-reset/', views.CustomPasswordResetView.as_view(), name='password_reset'),
     path('password-reset/done/', views.CustomPasswordResetDoneView.as_view(), name='password_reset_done'),

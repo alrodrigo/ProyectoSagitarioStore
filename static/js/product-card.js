@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Enviar solicitud AJAX para añadir al carrito
-        fetch('/carrito/agregar-ajax/', {  // Corregido: guion en lugar de guion bajo
+        fetch('/carrito/agregar-ajax/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Enviar solicitud AJAX para toggle de wishlist
-        fetch('/wishlist/toggle/', {
+        fetch('/usuarios/wishlist/toggle/', {  // URL CORREGIDA
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -178,7 +178,23 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: `product_id=${productId}`
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.success) {
+                // Si hay un error, revertir cambios visuales
+                if (icon.classList.contains('fas')) {
+                    icon.classList.replace('fas', 'far');
+                } else {
+                    icon.classList.replace('far', 'fas');
+                }
+                showNotification('<i class="fas fa-exclamation-circle"></i> ' + (data.error || 'Error al actualizar favoritos'), 'error');
+            }
+        })
         .catch(error => {
             console.error('Error al actualizar lista de deseos:', error);
             // Restaurar estado anterior en caso de error
@@ -187,6 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 icon.classList.replace('far', 'fas');
             }
+            showNotification('<i class="fas fa-exclamation-circle"></i> Error de conexión', 'error');
         });
     }
     

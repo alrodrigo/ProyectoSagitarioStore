@@ -66,6 +66,10 @@ class Product(models.Model):
     image = models.ImageField('Imagen principal', upload_to='products/')
     featured = models.BooleanField('Destacado', default=False)
     is_active = models.BooleanField(default=True, db_index=True)
+    is_reservable = models.BooleanField('Disponible para reserva', default=False, 
+                                      help_text='Indica si este producto puede ser reservado')
+    min_reservation_days = models.PositiveIntegerField('Días mínimos de reserva', default=3,
+                                                    help_text='Tiempo mínimo en días requerido para la reserva')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

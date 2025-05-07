@@ -4,8 +4,9 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import Http404, JsonResponse
 from productos.models import Product
-from .models import DireccionEnvio, MetodoEnvio, Pedido, ItemPedido, SeguimientoPedido, Pago
-from .forms import DireccionEnvioForm, MetodoEnvioForm, MetodoPagoForm, NotasForm
+from .models import DireccionEnvio, MetodoEnvio, Pedido, ItemPedido, SeguimientoPedido, Pago, Reserva
+from .forms import DireccionEnvioForm, MetodoEnvioForm, MetodoPagoForm, NotasForm, ReservaForm
+from django.utils import timezone
 
 @login_required
 def carrito_view(request):
@@ -629,3 +630,135 @@ def verificar_pago(request, pedido_id):
             'success': False,
             'error': "No se encontró el pedido solicitado."
         }, status=404)
+
+# Vistas para el sistema de reservas
+
+@login_required
+def mis_reservas(request):
+    """
+    Muestra todas las reservas del usuario actual
+    """
+    reservas = Reserva.objects.filter(usuario=request.user).order_by('-fecha_solicitud')
+    
+    # Agrupar reservas por estado para facilitar la visualización
+    reservas_activas = reservas.filter(estado__in=['solicitada', 'confirmada', 'pagada', 'lista'])
+    reservas_completadas = reservas.filter(estado='convertida')
+    reservas_canceladas = reservas.filter(estado='cancelada')
+    
+    context = {
+        'reservas_activas': reservas_activas,
+        'reservas_completadas': reservas_completadas,
+        'reservas_canceladas': reservas_canceladas,
+        'total_reservas': reservas.count(),
+    }
+    
+    return render(request, 'pedidos/reservas/mis_reservas.html', context)
+
+@login_required
+def detalle_reserva(request, reserva_id):
+    """
+    Muestra los detalles de una reserva específica
+    """
+    try:
+        reserva = Reserva.objects.get(id=reserva_id, usuario=request.user)
+    except Reserva.DoesNotExist:
+        messages.error(request, 'La reserva solicitada no existe o no tienes permiso para verla.')
+        return redirect('pedidos:mis_reservas')
+    
+    # Si la reserva ha sido convertida a pedido, mostrar también el pedido
+    pedido = None
+    if reserva.pedido_creado:
+        pedido = reserva.pedido_creado
+    
+    context = {
+        'reserva': reserva,
+        'pedido': pedido,
+        'estados_badges': {
+            'solicitada': 'badge-info',
+            'confirmada': 'badge-primary',
+            'pagada': 'badge-success',
+            'lista': 'badge-warning',
+            'convertida': 'badge-secondary',
+            'cancelada': 'badge-danger',
+        }
+    }
+    
+    return render(request, 'pedidos/reservas/detalle_reserva.html', context)
+
+@login_required
+def solicitar_reserva(request, producto_id):
+    """
+    Permite al usuario solicitar una reserva para un producto
+    """
+    try:
+        producto = Product.objects.get(id=producto_id)
+    except Product.DoesNotExist:
+        messages.error(request, 'El producto solicitado no existe.')
+        return redirect('productos:lista_productos')
+    
+    # Verificar si el usuario ya tiene una reserva activa para este producto
+    reserva_existente = Reserva.objects.filter(
+        usuario=request.user,
+        producto=producto,
+        estado__in=['solicitada', 'confirmada', 'pagada', 'lista']
+    ).first()
+    
+    if reserva_existente:
+        messages.warning(request, f'Ya tienes una reserva activa para este producto (#{reserva_existente.id}).')
+        return redirect('pedidos:detalle_reserva', reserva_id=reserva_existente.id)
+    
+    if request.method == 'POST':
+        form = ReservaForm(request.POST)
+        if form.is_valid():
+            reserva = form.save(commit=False)
+            reserva.usuario = request.user
+            reserva.producto = producto
+            reserva.monto_total = producto.price * reserva.cantidad
+            reserva.save()
+            
+            messages.success(request, 'Tu solicitud de reserva ha sido enviada. Te notificaremos cuando sea confirmada.')
+            return redirect('pedidos:detalle_reserva', reserva_id=reserva.id)
+    else:
+        form = ReservaForm()
+    
+    context = {
+        'form': form,
+        'producto': producto,
+        'precio_unitario': producto.price,
+    }
+    
+    return render(request, 'pedidos/reservas/solicitar_reserva.html', context)
+
+@login_required
+def cancelar_reserva(request, reserva_id):
+    """
+    Permite al usuario cancelar una reserva que aún no ha sido confirmada
+    """
+    try:
+        reserva = Reserva.objects.get(id=reserva_id, usuario=request.user)
+    except Reserva.DoesNotExist:
+        messages.error(request, 'La reserva solicitada no existe o no tienes permiso para cancelarla.')
+        return redirect('pedidos:mis_reservas')
+    
+    # Solo permitir cancelar reservas en estados específicos
+    if reserva.estado in ['convertida', 'cancelada']:
+        messages.error(request, 'Esta reserva ya no puede ser cancelada.')
+        return redirect('pedidos:detalle_reserva', reserva_id=reserva_id)
+    
+    # Si ya se ha pagado un anticipo, no permitir cancelación directa
+    if reserva.anticipo and reserva.estado == 'pagada':
+        messages.warning(request, 'No puedes cancelar esta reserva porque ya se ha pagado un anticipo. Por favor, contacta con el administrador.')
+        return redirect('pedidos:detalle_reserva', reserva_id=reserva_id)
+    
+    # Verificar que sea una solicitud POST (para evitar cancelaciones accidentales)
+    if request.method == 'POST':
+        reserva.cancelar_reserva()
+        messages.success(request, 'Tu reserva ha sido cancelada correctamente.')
+        return redirect('pedidos:mis_reservas')
+    
+    # Si es una solicitud GET, mostrar página de confirmación
+    context = {
+        'reserva': reserva,
+    }
+    
+    return render(request, 'pedidos/reservas/confirmar_cancelacion.html', context)

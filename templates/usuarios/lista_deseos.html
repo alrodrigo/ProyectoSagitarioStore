@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mi Lista de Deseos - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/category.css' %}">
+<link rel="stylesheet" href="{% static 'css/product-card.css' %}">
+<style>
+    .wishlist-container {
+        padding: 40px 0;
+    }
+    
+    .wishlist-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .wishlist-header h1 {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+        color: var(--color-primary, #3f51b5);
+    }
+    
+    .empty-wishlist {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        text-align: center;
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        color: #ccc;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .empty-icon i {
+        color: #e91e63;
+        opacity: 0.6;
+    }
+    
+    .empty-wishlist h2 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    
+    .empty-wishlist p {
+        color: #666;
+        margin-bottom: 25px;
+        max-width: 400px;
+    }
+    
+    .products-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wishlist-container container">
+    <section class="wishlist-header">
+        <h1>Mi Lista de Deseos</h1>
+        <p>Productos que has marcado como favoritos</p>
+    </section>
+
+    {% if lista_deseos %}
+    <div class="products-container">
+        {% for item in lista_deseos %}
+            {% include 'components/product_card.html' with product=item.producto %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-wishlist">
+        <div class="empty-icon">
+            <i class="far fa-heart fa-4x"></i>
+        </div>
+        <h2>Tu lista de deseos está vacía</h2>
+        <p>Agrega productos a favoritos para verlos aquí y comprarlos más tarde</p>
+        <a href="{% url 'productos:lista_productos' %}" class="btn btn-primary">Explorar productos</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/product-card.js' %}"></script>
+{% endblock %}

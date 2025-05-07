@@ -4,7 +4,7 @@ from django.urls import reverse, path
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
-from .models import DireccionEnvio, MetodoEnvio, Pedido, ItemPedido, SeguimientoPedido, Pago, QRPredefinido
+from .models import DireccionEnvio, MetodoEnvio, Pedido, ItemPedido, SeguimientoPedido, Pago, QRPredefinido, Reserva
 from .services.whatsapp_service import WhatsAppNotificationService
 
 class ItemPedidoInline(admin.TabularInline):
@@ -393,3 +393,72 @@ class QRPredefinidoAdmin(admin.ModelAdmin):
             return format_html('<a href="{}" target="_blank">Ver QR</a>', obj.imagen.url)
         return "-"
     ver_qr.short_description = 'QR'
+
+@admin.register(Reserva)
+class ReservaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'usuario', 'producto_link', 'cantidad', 'monto_total', 'anticipo', 'estado', 'fecha_solicitud', 'fecha_llegada_estimada')
+    list_filter = ('estado', 'fecha_solicitud', 'fecha_llegada_estimada')
+    search_fields = ('usuario__username', 'usuario__email', 'producto__name', 'notas_cliente', 'notas_admin')
+    readonly_fields = ('fecha_solicitud', 'fecha_actualizacion', 'monto_total')
+    actions = ['confirmar_reservas', 'marcar_como_listas', 'cancelar_reservas']
+    
+    fieldsets = (
+        ('Información de la Reserva', {
+            'fields': ('estado', 'usuario', 'producto', 'cantidad', 'fecha_solicitud', 'fecha_actualizacion')
+        }),
+        ('Fechas y Pagos', {
+            'fields': ('fecha_llegada_estimada', 'monto_total', 'anticipo', 'fecha_anticipo')
+        }),
+        ('Notas', {
+            'fields': ('notas_cliente', 'notas_admin')
+        }),
+        ('Estado de seguimiento', {
+            'fields': ('notificacion_enviada', 'pedido_creado')
+        }),
+    )
+    
+    def producto_link(self, obj):
+        if obj.producto:
+            link = reverse("admin:productos_product_change", args=[obj.producto.id])
+            return format_html('<a href="{}">{}</a>', link, obj.producto.name)
+        return "N/A"
+    producto_link.short_description = 'Producto'
+    
+    def confirmar_reservas(self, request, queryset):
+        """Acción masiva para confirmar reservas"""
+        count = 0
+        for reserva in queryset.filter(estado='solicitada'):
+            reserva.confirmar_reserva()
+            count += 1
+            
+        if count:
+            self.message_user(request, f"{count} reservas confirmadas exitosamente")
+        else:
+            self.message_user(request, "No se confirmó ninguna reserva", level=messages.WARNING)
+    confirmar_reservas.short_description = "Confirmar reservas seleccionadas"
+    
+    def marcar_como_listas(self, request, queryset):
+        """Acción masiva para marcar reservas como listas para entrega"""
+        count = 0
+        for reserva in queryset.filter(estado__in=['confirmada', 'pagada']):
+            reserva.marcar_como_lista()
+            count += 1
+            
+        if count:
+            self.message_user(request, f"{count} reservas marcadas como listas para entrega")
+        else:
+            self.message_user(request, "No se actualizó ninguna reserva", level=messages.WARNING)
+    marcar_como_listas.short_description = "Marcar como listas para entrega"
+    
+    def cancelar_reservas(self, request, queryset):
+        """Acción masiva para cancelar reservas"""
+        count = 0
+        for reserva in queryset.exclude(estado__in=['convertida', 'cancelada']):
+            reserva.cancelar_reserva()
+            count += 1
+            
+        if count:
+            self.message_user(request, f"{count} reservas canceladas")
+        else:
+            self.message_user(request, "No se canceló ninguna reserva", level=messages.WARNING)
+    cancelar_reservas.short_description = "Cancelar reservas seleccionadas"

@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Detalle de Reserva #{{ reserva.id }} - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detalle-reserva-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .page-title {
+        font-size: 1.75rem;
+        color: #333;
+        margin: 0;
+    }
+    
+    .reserva-estado {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .estado-solicitada {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+    }
+    
+    .estado-confirmada {
+        background-color: #e8eaf6;
+        color: #3f51b5;
+    }
+    
+    .estado-lista {
+        background-color: #fff8e1;
+        color: #f57f17;
+    }
+    
+    .estado-convertida {
+        background-color: #eeeeee;
+        color: #616161;
+    }
+    
+    .estado-cancelada {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+    
+    .detalle-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .detalle-section {
+        padding: 1.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .detalle-section:last-child {
+        border-bottom: none;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .section-title i {
+        color: #6c757d;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .info-item {
+        margin-bottom: 1rem;
+    }
+    
+    .info-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+    }
+    
+    .info-value {
+        font-size: 1rem;
+        color: #212529;
+        font-weight: 500;
+    }
+    
+    .producto-card {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .producto-imagen {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .producto-detalles {
+        flex: 1;
+    }
+    
+    .producto-nombre {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: #212529;
+    }
+    
+    .producto-precio {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.5rem;
+    }
+    
+    .producto-metadata {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .metadata-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .timeline {
+        margin: 2rem 0;
+        position: relative;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        width: 2px;
+        background-color: #e9ecef;
+        top: 0;
+        bottom: 0;
+        left: 20px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 45px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        left: 13px;
+        top: 4px;
+        border: 2px solid #fff;
+        background-color: #6c757d;
+        z-index: 1;
+    }
+    
+    .timeline-marker.active {
+        background-color: #28a745;
+    }
+    
+    .timeline-marker.pending {
+        background-color: #ffc107;
+    }
+    
+    .timeline-marker.cancelled {
+        background-color: #dc3545;
+    }
+    
+    .timeline-content {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+    }
+    
+    .timeline-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #212529;
+    }
+    
+    .timeline-date {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .timeline-description {
+        font-size: 0.875rem;
+        color: #495057;
+    }
+    
+    .actions-section {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+    }
+    
+    .btn-action {
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0069d9;
+    }
+    
+    .btn-outline {
+        background-color: #fff;
+        color: #6c757d;
+        border: 1px solid #6c757d;
+    }
+    
+    .btn-outline:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .btn-danger {
+        background-color: #fff;
+        color: #dc3545;
+        border: 1px solid #dc3545;
+    }
+    
+    .btn-danger:hover {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border-left: 4px solid #ffc107;
+    }
+    
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border-left: 4px solid #17a2b8;
+    }
+    
+    .nota-adicional {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-left: 4px solid #6c757d;
+        border-radius: 4px;
+    }
+    
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .producto-card {
+            flex-direction: column;
+        }
+        
+        .producto-imagen {
+            width: 100%;
+            max-width: 200px;
+        }
+        
+        .actions-section {
+            flex-direction: column;
+        }
+        
+        .btn-action {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detalle-reserva-container">
+    <div class="page-header">
+        <h1 class="page-title">Reserva #{{ reserva.id }}</h1>
+        <div class="reserva-estado estado-{{ reserva.estado }}">{{ reserva.get_estado_display }}</div>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="detalle-card">
+        <div class="detalle-section">
+            <h2 class="section-title"><i class="fas fa-box-open"></i> Producto Reservado</h2>
+            <div class="producto-card">
+                <img src="{{ reserva.producto.image.url }}" alt="{{ reserva.producto.name }}" class="producto-imagen">
+                <div class="producto-detalles">
+                    <h3 class="producto-nombre">{{ reserva.producto.name }}</h3>
+                    <div class="producto-precio">{{ reserva.producto.price }} Bs</div>
+                    <p>{{ reserva.producto.description|truncatewords:30 }}</p>
+                    <div class="producto-metadata">
+                        <div class="metadata-item">
+                            <i class="fas fa-tag"></i> {{ reserva.producto.category.name }}
+                        </div>
+                        <div class="metadata-item">
+                            <i class="fas fa-boxes"></i> Cantidad: {{ reserva.cantidad }}
+                        </div>
+                        <div class="metadata-item">
+                            <i class="fas fa-money-bill-wave"></i> Total: {{ reserva.monto_total }} Bs
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if reserva.comentarios %}
+            <div class="nota-adicional">
+                <h4>Comentarios adicionales:</h4>
+                <p>{{ reserva.comentarios }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="detalle-section">
+            <h2 class="section-title"><i class="fas fa-info-circle"></i> Información de la Reserva</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Fecha de solicitud</div>
+                    <div class="info-value">{{ reserva.fecha_solicitud|date:"d/m/Y H:i" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Estado actual</div>
+                    <div class="info-value">{{ reserva.get_estado_display }}</div>
+                </div>
+                {% if reserva.fecha_confirmacion %}
+                <div class="info-item">
+                    <div class="info-label">Fecha de confirmación</div>
+                    <div class="info-value">{{ reserva.fecha_confirmacion|date:"d/m/Y H:i" }}</div>
+                </div>
+                {% endif %}
+                {% if reserva.fecha_disponible %}
+                <div class="info-item">
+                    <div class="info-label">Fecha disponible para entrega</div>
+                    <div class="info-value">{{ reserva.fecha_disponible|date:"d/m/Y H:i" }}</div>
+                </div>
+                {% endif %}
+                {% if reserva.anticipo %}
+                <div class="info-item">
+                    <div class="info-label">Anticipo</div>
+                    <div class="info-value">{{ reserva.anticipo }} Bs</div>
+                </div>
+                {% endif %}
+                <div class="info-item">
+                    <div class="info-label">Cliente</div>
+                    <div class="info-value">{{ reserva.usuario.get_full_name|default:reserva.usuario.username }}</div>
+                </div>
+                {% if reserva.telefono_contacto %}
+                <div class="info-item">
+                    <div class="info-label">Teléfono de contacto</div>
+                    <div class="info-value">{{ reserva.telefono_contacto }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="detalle-section">
+            <h2 class="section-title"><i class="fas fa-history"></i> Historial de la Reserva</h2>
+            <div class="timeline">
+                <!-- Solicitud -->
+                <div class="timeline-item">
+                    <div class="timeline-marker active"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Solicitud realizada</div>
+                        <div class="timeline-date">{{ reserva.fecha_solicitud|date:"d/m/Y H:i" }}</div>
+                        <div class="timeline-description">Has solicitado la reserva del producto "{{ reserva.producto.name }}".</div>
+                    </div>
+                </div>
+                
+                <!-- Confirmación -->
+                <div class="timeline-item">
+                    <div class="timeline-marker {% if reserva.fecha_confirmacion %}active{% elif reserva.estado == 'cancelada' %}cancelled{% else %}pending{% endif %}"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Confirmación de la tienda</div>
+                        {% if reserva.fecha_confirmacion %}
+                            <div class="timeline-date">{{ reserva.fecha_confirmacion|date:"d/m/Y H:i" }}</div>
+                            <div class="timeline-description">La tienda ha confirmado tu reserva.</div>
+                        {% elif reserva.estado == 'cancelada' %}
+                            <div class="timeline-description">Este paso fue omitido debido a la cancelación.</div>
+                        {% else %}
+                            <div class="timeline-description">Esperando confirmación de la tienda.</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Producto disponible -->
+                <div class="timeline-item">
+                    <div class="timeline-marker {% if reserva.fecha_disponible %}active{% elif reserva.estado == 'cancelada' %}cancelled{% else %}pending{% endif %}"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Producto disponible para entrega</div>
+                        {% if reserva.fecha_disponible %}
+                            <div class="timeline-date">{{ reserva.fecha_disponible|date:"d/m/Y H:i" }}</div>
+                            <div class="timeline-description">Tu producto ya está disponible para ser recogido.</div>
+                        {% elif reserva.estado == 'cancelada' %}
+                            <div class="timeline-description">Este paso fue omitido debido a la cancelación.</div>
+                        {% else %}
+                            <div class="timeline-description">La tienda te notificará cuando el producto esté disponible.</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Convertido a pedido o cancelado -->
+                <div class="timeline-item">
+                    <div class="timeline-marker {% if reserva.estado == 'convertida' %}active{% elif reserva.estado == 'cancelada' %}cancelled{% else %}pending{% endif %}"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">
+                            {% if reserva.estado == 'convertida' %}
+                                Convertido a pedido
+                            {% elif reserva.estado == 'cancelada' %}
+                                Reserva cancelada
+                            {% else %}
+                                Finalización de la reserva
+                            {% endif %}
+                        </div>
+                        
+                        {% if reserva.estado == 'convertida' %}
+                            <div class="timeline-date">{{ reserva.fecha_convertida|date:"d/m/Y H:i" }}</div>
+                            <div class="timeline-description">La reserva ha sido convertida a un pedido exitosamente.</div>
+                        {% elif reserva.estado == 'cancelada' %}
+                            <div class="timeline-date">{{ reserva.fecha_cancelacion|date:"d/m/Y H:i" }}</div>
+                            <div class="timeline-description">
+                                La reserva ha sido cancelada.
+                                {% if reserva.motivo_cancelacion %}
+                                    Motivo: {{ reserva.motivo_cancelacion }}
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="timeline-description">Pendiente de completar.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if reserva.estado == 'solicitada' %}
+        <div class="actions-section">
+            <a href="{% url 'pedidos:cancelar_reserva' reserva.id %}" class="btn-action btn-danger">
+                <i class="fas fa-times"></i> Cancelar Reserva
+            </a>
+            <a href="{% url 'productos:producto' reserva.producto.id %}" class="btn-action btn-outline">
+                <i class="fas fa-eye"></i> Ver Producto
+            </a>
+        </div>
+        {% elif reserva.estado == 'lista' %}
+        <div class="actions-section">
+            <a href="{% url 'pedidos:convertir_reserva' reserva.id %}" class="btn-action btn-primary">
+                <i class="fas fa-shopping-cart"></i> Convertir a Pedido
+            </a>
+            <a href="{% url 'productos:producto' reserva.producto.id %}" class="btn-action btn-outline">
+                <i class="fas fa-eye"></i> Ver Producto
+            </a>
+        </div>
+        {% elif reserva.estado == 'convertida' %}
+        <div class="actions-section">
+            <a href="{% url 'pedidos:detalle_pedido' reserva.pedido.id %}" class="btn-action btn-primary">
+                <i class="fas fa-box-open"></i> Ver Pedido
+            </a>
+            <a href="{% url 'productos:producto' reserva.producto.id %}" class="btn-action btn-outline">
+                <i class="fas fa-eye"></i> Ver Producto
+            </a>
+        </div>
+        {% else %}
+        <div class="actions-section">
+            <a href="{% url 'productos:producto' reserva.producto.id %}" class="btn-action btn-outline">
+                <i class="fas fa-eye"></i> Ver Producto
+            </a>
+            <a href="{% url 'pedidos:mis_reservas' %}" class="btn-action btn-outline">
+                <i class="fas fa-arrow-left"></i> Volver a Mis Reservas
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if reserva.estado == 'lista' %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Tu producto ya está disponible para ser recogido en la tienda. Puedes convertir esta reserva en un pedido para proceder con el pago y la entrega.
+    </div>
+    {% elif reserva.estado == 'solicitada' %}
+    <div class="alert alert-warning">
+        <i class="fas fa-clock"></i> Tu reserva está siendo procesada. Te notificaremos cuando esté confirmada o cuando el producto esté disponible.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

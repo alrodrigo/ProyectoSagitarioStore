@@ -21,4 +21,10 @@ urlpatterns = [
     # URLs para gestión de pagos
     path('pagos/<int:pago_id>/subir-comprobante/', views.subir_comprobante, name='subir_comprobante'),
     path('verificar-pago/<int:pedido_id>/', views.verificar_pago, name='verificar_pago'),
+    
+    # URLs para reservas
+    path('reservas/', views.mis_reservas, name='mis_reservas'),
+    path('reservas/<int:reserva_id>/', views.detalle_reserva, name='detalle_reserva'),
+    path('reservas/solicitar/<int:producto_id>/', views.solicitar_reserva, name='solicitar_reserva'),
+    path('reservas/<int:reserva_id>/cancelar/', views.cancelar_reserva, name='cancelar_reserva'),
 ]

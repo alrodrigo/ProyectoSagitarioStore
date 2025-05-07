@@ -169,8 +169,20 @@ class ProductDetailView(DetailView):
             category=producto.category
         ).exclude(id=producto.id)[:4]
         
+        # Verificar si el usuario tiene una reserva activa para este producto
+        reserva_existente = None
+        if self.request.user.is_authenticated:
+            from pedidos.models import Reserva
+            reserva_existente = Reserva.objects.filter(
+                usuario=self.request.user,
+                producto=producto,
+                estado__in=['solicitada', 'confirmada', 'pagada', 'lista']
+            ).first()
+        
         context.update({
             'productos_relacionados': productos_relacionados,
             'is_in_wishlist': False,  # Implement wishlist functionality if needed
+            'reserva_existente': reserva_existente,
+            'show_reserva_button': True,  # Flag para mostrar el botón de reserva
         })
         return context

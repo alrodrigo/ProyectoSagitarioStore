@@ -1,5 +1,6 @@
 from django import forms
-from .models import DireccionEnvio, Pedido, MetodoEnvio
+from .models import DireccionEnvio, Pedido, MetodoEnvio, Reserva
+from django.utils import timezone
 
 class DireccionEnvioForm(forms.ModelForm):
     """Formulario para crear o editar una dirección de envío"""
@@ -58,3 +59,27 @@ class NotasForm(forms.Form):
             'rows': 3
         })
     )
+
+class ReservaForm(forms.ModelForm):
+    """Formulario para solicitar una reserva de producto"""
+    class Meta:
+        model = Reserva
+        fields = ['cantidad', 'notas_cliente']
+        widgets = {
+            'cantidad': forms.NumberInput(attrs={
+                'class': 'form-input',
+                'min': '1',
+                'placeholder': 'Cantidad'
+            }),
+            'notas_cliente': forms.Textarea(attrs={
+                'class': 'form-textarea', 
+                'placeholder': 'Especificaciones o notas adicionales para tu reserva',
+                'rows': 3
+            })
+        }
+    
+    def clean_cantidad(self):
+        cantidad = self.cleaned_data.get('cantidad')
+        if cantidad < 1:
+            raise forms.ValidationError("La cantidad debe ser al menos 1")
+        return cantidad

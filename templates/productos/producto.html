@@ -81,7 +81,7 @@
                 </div>
                 
                 <div class="producto-acciones">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" {% if producto.stock <= 0 %}disabled{% endif %}>
                         <i class="fas fa-shopping-cart"></i> Añadir al carrito
                     </button>
                     <button type="button" class="btn btn-wishlist">
@@ -89,6 +89,26 @@
                     </button>
                 </div>
             </form>
+            
+            {% if producto.is_reservable %}
+            <div class="producto-reserva">
+                <a href="{% url 'pedidos:solicitar_reserva' producto.id %}" class="btn btn-reserva">
+                    <i class="fas fa-bookmark"></i> Solicitar Reserva
+                </a>
+                <p class="reserva-info">
+                    <small>
+                        <i class="fas fa-info-circle"></i> 
+                        Este producto puede ser reservado. 
+                        {% if producto.stock <= 0 %}
+                        Actualmente no está disponible en stock.
+                        {% else %}
+                        También disponible para compra inmediata.
+                        {% endif %}
+                        Tiempo mínimo de reserva: {{ producto.min_reservation_days }} días.
+                    </small>
+                </p>
+            </div>
+            {% endif %}
 
             <div class="producto-detalles-adicionales">
                 <div class="caracteristica">

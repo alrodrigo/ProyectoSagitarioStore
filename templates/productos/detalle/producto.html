@@ -7,6 +7,59 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/vista_producto.css' %}">
+<style>
+    .btn-reserva {
+        background-color: #ff9800;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background-color 0.3s;
+    }
+    .btn-reserva:hover {
+        background-color: #f57c00;
+        color: white;
+    }
+    .btn-reserva-existing {
+        background-color: #4caf50;
+    }
+    .btn-reserva-existing:hover {
+        background-color: #43a047;
+    }
+    .badge-info {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background-color: #e3f2fd;
+        color: #1976d2;
+        margin-left: 10px;
+    }
+    .reserva-block {
+        margin-top: 15px;
+        padding: 15px;
+        background-color: #fff8e1;
+        border-left: 4px solid #f57c00;
+        border-radius: 4px;
+    }
+    .reserva-block h3 {
+        color: #f57c00;
+        margin-bottom: 8px;
+        font-size: 1.1rem;
+    }
+    .reserva-block p {
+        margin-bottom: 5px;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -72,6 +125,17 @@
                 {{ producto.description|linebreaks }}
             </div>
 
+            {% if reserva_existente %}
+                <div class="reserva-block">
+                    <h3>Ya tienes una reserva para este producto</h3>
+                    <p>Reserva #{{ reserva_existente.id }} - Estado: {{ reserva_existente.get_estado_display }}</p>
+                    <p>Cantidad: {{ reserva_existente.cantidad }}</p>
+                    <a href="{% url 'pedidos:detalle_reserva' reserva_existente.id %}" class="btn btn-reserva btn-reserva-existing">
+                        <i class="fas fa-bookmark"></i> Ver detalles de tu reserva
+                    </a>
+                </div>
+            {% endif %}
+
             <form class="producto-compra" method="POST" action="{% url 'carrito:agregar_al_carrito' producto.id %}">
                 {% csrf_token %}
                 <div class="cantidad-selector">
@@ -81,9 +145,18 @@
                 </div>
                 
                 <div class="producto-acciones">
+                    {% if producto.stock > 0 %}
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-shopping-cart"></i> Añadir al carrito
                     </button>
+                    {% endif %}
+                    
+                    {% if show_reserva_button and not reserva_existente %}
+                        <a href="{% url 'pedidos:solicitar_reserva' producto.id %}" class="btn btn-reserva">
+                            <i class="fas fa-calendar-alt"></i> Reservar Producto
+                        </a>
+                    {% endif %}
+                    
                     <button type="button" class="btn btn-wishlist">
                         <i class="far fa-heart"></i>
                     </button>

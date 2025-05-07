@@ -316,3 +316,101 @@ class QRPredefinido(models.Model):
         verbose_name = "QR Predefinido"
         verbose_name_plural = "QRs Predefinidos"
         ordering = ['nombre']
+
+class Reserva(models.Model):
+    """Modelo para almacenar reservas de preventas de productos"""
+    ESTADO_CHOICES = (
+        ('solicitada', 'Solicitada'),
+        ('confirmada', 'Confirmada'),
+        ('pagada', 'Pagada parcialmente'),
+        ('lista', 'Lista para entrega'),
+        ('convertida', 'Convertida a pedido'),
+        ('cancelada', 'Cancelada'),
+    )
+    
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reservas')
+    producto = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reservas')
+    cantidad = models.PositiveIntegerField(default=1)
+    fecha_solicitud = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_llegada_estimada = models.DateField(null=True, blank=True, 
+                                            help_text="Fecha estimada de llegada del producto")
+    
+    monto_total = models.DecimalField(max_digits=10, decimal_places=2)
+    anticipo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
+                                help_text="Monto pagado como anticipo")
+    fecha_anticipo = models.DateTimeField(null=True, blank=True)
+    
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='solicitada')
+    notas_cliente = models.TextField(blank=True, null=True, 
+                                  help_text="Notas adicionales del cliente sobre la reserva")
+    notas_admin = models.TextField(blank=True, null=True,
+                                help_text="Notas internas para administradores")
+    
+    notificacion_enviada = models.BooleanField(default=False,
+                                            help_text="Indica si se ha enviado notificación cuando el producto está disponible")
+    pedido_creado = models.ForeignKey(Pedido, null=True, blank=True, on_delete=models.SET_NULL,
+                                    help_text="Pedido generado a partir de esta reserva")
+    
+    def __str__(self):
+        return f"Reserva #{self.id} - {self.producto.name} ({self.get_estado_display()})"
+    
+    class Meta:
+        verbose_name = "Reserva"
+        verbose_name_plural = "Reservas"
+        ordering = ['-fecha_solicitud']
+
+    def save(self, *args, **kwargs):
+        # Si es una nueva reserva, calcular el monto total
+        if not self.pk and not self.monto_total:
+            self.monto_total = self.producto.price * self.cantidad
+            
+        # Si se está guardando un anticipo por primera vez
+        if self.anticipo and not self.fecha_anticipo:
+            self.fecha_anticipo = timezone.now()
+            # Si hay anticipo, actualizar el estado a "pagada parcialmente"
+            if self.estado == 'solicitada' or self.estado == 'confirmada':
+                self.estado = 'pagada'
+                
+        super().save(*args, **kwargs)
+    
+    def confirmar_reserva(self):
+        """Confirma la reserva por parte del administrador"""
+        self.estado = 'confirmada'
+        self.save()
+        return True
+    
+    def registrar_anticipo(self, monto):
+        """Registra un anticipo para la reserva"""
+        self.anticipo = monto
+        self.estado = 'pagada'
+        self.fecha_anticipo = timezone.now()
+        self.save()
+        return True
+    
+    def marcar_como_lista(self):
+        """Marca la reserva como lista para entrega"""
+        self.estado = 'lista'
+        self.save()
+        # Aquí se podría enviar una notificación al cliente
+        self.notificacion_enviada = True
+        self.save(update_fields=['notificacion_enviada'])
+        return True
+    
+    def cancelar_reserva(self):
+        """Cancela la reserva"""
+        self.estado = 'cancelada'
+        self.save()
+        return True
+    
+    def convertir_a_pedido(self):
+        """Convierte la reserva en un pedido formal"""
+        if self.pedido_creado:
+            return self.pedido_creado
+        
+        # Aquí iría la lógica para crear un pedido a partir de la reserva
+        # Este método se completaría al implementar la conversión a pedido
+        
+        self.estado = 'convertida'
+        self.save()
+        return None  # Reemplazar con el pedido creado

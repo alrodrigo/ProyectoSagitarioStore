@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mis Reservas - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    .mis-reservas-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    
+    .page-title {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+    
+    .reservas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .reserva-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .reserva-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .reserva-header {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .reserva-id {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .reserva-fecha {
+        font-size: 0.85rem;
+        color: #666;
+    }
+    
+    .reserva-estado {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .estado-solicitada {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+    }
+    
+    .estado-confirmada {
+        background-color: #e8eaf6;
+        color: #3f51b5;
+    }
+    
+    .estado-lista {
+        background-color: #fff8e1;
+        color: #f57f17;
+    }
+    
+    .estado-convertida {
+        background-color: #eeeeee;
+        color: #616161;
+    }
+    
+    .estado-cancelada {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+    
+    .reserva-content {
+        padding: 1rem;
+    }
+    
+    .producto-info {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .producto-imagen {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    
+    .producto-detalles {
+        flex: 1;
+    }
+    
+    .producto-nombre {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .producto-metadata {
+        color: #666;
+        font-size: 0.85rem;
+    }
+    
+    .reserva-detalles {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 1rem;
+        border-top: 1px dashed #eee;
+    }
+    
+    .detalle-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .detalle-label {
+        font-size: 0.8rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+    }
+    
+    .detalle-valor {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .reserva-acciones {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        border-top: 1px solid #eee;
+        background-color: #f8f9fa;
+    }
+    
+    .btn-ver-detalles {
+        background-color: #fff;
+        color: #333;
+        border: 1px solid #ddd;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-ver-detalles:hover {
+        background-color: #e9ecef;
+    }
+    
+    .btn-cancelar {
+        background-color: #fff;
+        color: #dc3545;
+        border: 1px solid #dc3545;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-cancelar:hover {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    
+    .empty-state {
+        padding: 3rem;
+        text-align: center;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        color: #adb5bd;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    
+    .empty-description {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-explorar {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-explorar:hover {
+        background-color: #0069d9;
+        color: #fff;
+    }
+    
+    .filtro-reservas {
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .filtro-btn {
+        background-color: #f8f9fa;
+        color: #495057;
+        border: 1px solid #ddd;
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .filtro-btn:hover {
+        background-color: #e9ecef;
+    }
+    
+    .filtro-btn.active {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #007bff;
+    }
+    
+    @media (max-width: 768px) {
+        .reservas-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .reserva-acciones {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .btn-ver-detalles, .btn-cancelar {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mis-reservas-container">
+    <h1 class="page-title">Mis Reservas</h1>
+    
+    {% if reservas %}
+        <div class="filtro-reservas">
+            <button class="filtro-btn active" data-filter="all">Todas</button>
+            <button class="filtro-btn" data-filter="solicitada">Solicitadas</button>
+            <button class="filtro-btn" data-filter="confirmada">Confirmadas</button>
+            <button class="filtro-btn" data-filter="lista">Listas para entrega</button>
+            <button class="filtro-btn" data-filter="convertida">Convertidas a pedido</button>
+            <button class="filtro-btn" data-filter="cancelada">Canceladas</button>
+        </div>
+        
+        <div class="reservas-grid">
+            {% for reserva in reservas %}
+            <div class="reserva-card" data-estado="{{ reserva.estado }}">
+                <div class="reserva-header">
+                    <div class="reserva-id">Reserva #{{ reserva.id }}</div>
+                    <div class="reserva-estado estado-{{ reserva.estado }}">{{ reserva.get_estado_display }}</div>
+                </div>
+                
+                <div class="reserva-content">
+                    <div class="producto-info">
+                        <img src="{{ reserva.producto.image.url }}" alt="{{ reserva.producto.name }}" class="producto-imagen">
+                        <div class="producto-detalles">
+                            <h3 class="producto-nombre">{{ reserva.producto.name }}</h3>
+                            <div class="producto-metadata">
+                                <p>{{ reserva.fecha_solicitud|date:"d/m/Y" }}</p>
+                                <p>Cantidad: {{ reserva.cantidad }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="reserva-detalles">
+                        <div class="detalle-item">
+                            <span class="detalle-label">Precio</span>
+                            <span class="detalle-valor">{{ reserva.producto.price }} Bs</span>
+                        </div>
+                        
+                        <div class="detalle-item">
+                            <span class="detalle-label">Total</span>
+                            <span class="detalle-valor">{{ reserva.monto_total }} Bs</span>
+                        </div>
+                        
+                        {% if reserva.anticipo %}
+                        <div class="detalle-item">
+                            <span class="detalle-label">Anticipo</span>
+                            <span class="detalle-valor">{{ reserva.anticipo }} Bs</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="reserva-acciones">
+                    <a href="{% url 'pedidos:detalle_reserva' reserva.id %}" class="btn-ver-detalles">
+                        <i class="fas fa-eye"></i> Ver detalles
+                    </a>
+                    
+                    {% if reserva.estado == 'solicitada' %}
+                    <a href="{% url 'pedidos:cancelar_reserva' reserva.id %}" class="btn-cancelar">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-calendar-times"></i>
+            </div>
+            <h2 class="empty-title">No tienes reservas actualmente</h2>
+            <p class="empty-description">¿Necesitas un producto que no está en stock? ¡Haz una reserva para ser notificado cuando esté disponible!</p>
+            <a href="{% url 'productos:home' %}" class="btn-explorar">
+                <i class="fas fa-search"></i> Explorar productos
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Funcionalidad de filtros para reservas
+        const filtroButtons = document.querySelectorAll('.filtro-btn');
+        const reservaCards = document.querySelectorAll('.reserva-card');
+        
+        filtroButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remover la clase active de todos los botones
+                filtroButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Añadir la clase active al botón clickeado
+                this.classList.add('active');
+                
+                // Obtener el filtro seleccionado
+                const filterValue = this.getAttribute('data-filter');
+                
+                // Mostrar/ocultar cards según el filtro
+                reservaCards.forEach(card => {
+                    const estado = card.getAttribute('data-estado');
+                    
+                    if (filterValue === 'all' || filterValue === estado) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pagar Anticipo - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pago-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    
+    .pago-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .pago-title {
+        font-size: 1.75rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .pago-subtitle {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    
+    .pago-card {
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .pago-card-header {
+        background-color: #f8f9fa;
+        padding: 1.25rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .pago-card-title {
+        margin: 0;
+        font-size: 1.25rem;
+        color: #333;
+    }
+    
+    .pago-card-body {
+        padding: 1.25rem;
+    }
+    
+    .pago-info {
+        margin-bottom: 1.5rem;
+    }
+    
+    .pago-detail {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .pago-detail:last-child {
+        border-bottom: none;
+    }
+    
+    .pago-label {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .pago-value {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .pago-total {
+        font-size: 1.1rem;
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+    
+    .qr-section {
+        text-align: center;
+        margin: 2rem 0;
+    }
+    
+    .qr-container {
+        display: inline-block;
+        padding: 1rem;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .qr-image {
+        max-width: 250px;
+        height: auto;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        transition: border-color 0.2s;
+    }
+    
+    .form-control:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .file-input-container {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .file-input-label {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .file-input-label:hover {
+        background-color: #e9ecef;
+    }
+    
+    .file-input-label i {
+        margin-right: 0.5rem;
+    }
+    
+    .file-input {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 0.1px;
+        height: 0.1px;
+    }
+    
+    .file-name {
+        margin-left: 1rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0069d9;
+    }
+    
+    .btn-outline {
+        background-color: transparent;
+        border: 1px solid #6c757d;
+        color: #6c757d;
+    }
+    
+    .btn-outline:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .btn-block {
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+        border: 1px solid transparent;
+    }
+    
+    .alert-info {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+        color: #0c5460;
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffeeba;
+        color: #856404;
+    }
+    
+    .instructions {
+        margin-bottom: 2rem;
+    }
+    
+    .instructions ol {
+        padding-left: 1.5rem;
+    }
+    
+    .instructions li {
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pago-container">
+    <div class="pago-header">
+        <h1 class="pago-title">Pago de Anticipo</h1>
+        <p class="pago-subtitle">Reserva #{{ reserva.id }}</p>
+    </div>
+    
+    <div class="alert alert-info">
+        <p>Para confirmar tu reserva, es necesario realizar un pago de anticipo del 30% del valor total.</p>
+    </div>
+    
+    <div class="pago-card">
+        <div class="pago-card-header">
+            <h2 class="pago-card-title">Detalles del pago</h2>
+        </div>
+        <div class="pago-card-body">
+            <div class="pago-info">
+                <div class="pago-detail">
+                    <span class="pago-label">Producto:</span>
+                    <span class="pago-value">{{ reserva.producto.name }}</span>
+                </div>
+                <div class="pago-detail">
+                    <span class="pago-label">Cantidad:</span>
+                    <span class="pago-value">{{ reserva.cantidad }}</span>
+                </div>
+                <div class="pago-detail">
+                    <span class="pago-label">Precio unitario:</span>
+                    <span class="pago-value">{{ reserva.producto.price }} Bs</span>
+                </div>
+                <div class="pago-detail">
+                    <span class="pago-label">Total de la reserva:</span>
+                    <span class="pago-value">{{ reserva.monto_total }} Bs</span>
+                </div>
+                <div class="pago-detail pago-total">
+                    <span class="pago-label">Anticipo a pagar (30%):</span>
+                    <span class="pago-value">{{ anticipo_calculado }} Bs</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="pago-card">
+        <div class="pago-card-header">
+            <h2 class="pago-card-title">Instrucciones de pago</h2>
+        </div>
+        <div class="pago-card-body">
+            <div class="instructions">
+                <ol>
+                    <li>Escanea el código QR mostrado a continuación o utiliza los datos bancarios proporcionados.</li>
+                    <li>Realiza la transferencia o pago por el monto exacto del anticipo: <strong>{{ anticipo_calculado }} Bs</strong>.</li>
+                    <li>Toma una captura de pantalla o foto del comprobante de pago.</li>
+                    <li>Sube la imagen del comprobante en el formulario de abajo.</li>
+                    <li>Haz clic en "Confirmar pago" para completar el proceso.</li>
+                </ol>
+            </div>
+            
+            <div class="qr-section">
+                <h3>Código QR para pago</h3>
+                <div class="qr-container">
+                    <img src="{{ qr_predefinido.imagen.url }}" alt="Código QR para pago" class="qr-image">
+                </div>
+                <p class="mt-3">Banco: {{ qr_predefinido.banco }}</p>
+                <p>Titular: {{ qr_predefinido.titular }}</p>
+                <p>Nro. Cuenta: {{ qr_predefinido.numero_cuenta }}</p>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" action="{% url 'pedidos:pagar_reserva' reserva.id %}">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-warning">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="{{ form.monto.id_for_label }}" class="form-label">Monto pagado (Bs)</label>
+                    {{ form.monto }}
+                    {% if form.monto.errors %}
+                    <div class="error-message">
+                        {% for error in form.monto.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <div class="file-input-container">
+                        <label for="{{ form.comprobante.id_for_label }}" class="file-input-label">
+                            <i class="fas fa-upload"></i> Subir comprobante
+                        </label>
+                        {{ form.comprobante }}
+                        <span class="file-name" id="file-name">Ningún archivo seleccionado</span>
+                        
+                        {% if form.comprobante.errors %}
+                        <div class="error-message">
+                            {% for error in form.comprobante.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.referencia.id_for_label }}" class="form-label">Referencia de la transferencia</label>
+                    {{ form.referencia }}
+                    {% if form.referencia.errors %}
+                    <div class="error-message">
+                        {% for error in form.referencia.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">Confirmar pago</button>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'pedidos:detalle_reserva' reserva.id %}" class="btn btn-outline">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.querySelector('.file-input');
+        const fileName = document.getElementById('file-name');
+        
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                fileName.textContent = this.files[0].name;
+            } else {
+                fileName.textContent = 'Ningún archivo seleccionado';
+            }
+        });
+    });
+</script>
+{% endblock %}

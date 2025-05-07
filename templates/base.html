@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="{% static 'css/forms.css' %}"> <!-- Añadido forms.css aquí -->
     <link rel="stylesheet" href="{% static 'css/notifications.css' %}">
     <link rel="stylesheet" href="{% static 'css/ajax-notifications.css' %}">
+    <link rel="stylesheet" href="{% static 'css/product-card.css' %}"> <!-- Añadido estilos de tarjetas de producto -->
 
     {% block extra_css %}{% endblock %} <!-- CSS específico de la página -->
 </head>
@@ -73,11 +74,17 @@
                             <a href="{% url 'usuarios:perfil' %}" class="navbar__link">
                                 <i class="fas fa-user-circle"></i> Mi Perfil
                             </a>
+                            <a href="{% url 'usuarios:mi_lista_deseos' %}" class="navbar__link">
+                                <i class="fas fa-heart"></i> Mis Favoritos
+                            </a>
                             <a href="{% url 'pedidos:mis_pedidos' %}" class="navbar__link">
                                 <i class="fas fa-box-open"></i> Mis Pedidos
                                 {% if pending_orders_count > 0 %}
                                 <span class="badge badge-notification">{{ pending_orders_count }}</span>
                                 {% endif %}
+                            </a>
+                            <a href="{% url 'pedidos:mis_reservas' %}" class="navbar__link">
+                                <i class="fas fa-calendar-check"></i> Mis Reservas
                             </a>
                             <form action="{% url 'usuarios:logout' %}" method="post" class="logout-form">
                                 {% csrf_token %}
@@ -89,6 +96,13 @@
                     </div>
                 {% else %}
                     <a href="{% url 'usuarios:login' %}" class="navbar__link">Iniciar Sesión</a>
+                {% endif %}
+                
+                <!-- Enlace a Favoritos -->
+                {% if user.is_authenticated %}
+                <a href="{% url 'usuarios:mi_lista_deseos' %}" class="navbar__link" aria-label="Ver favoritos">
+                    <i class="fas fa-heart"></i>
+                </a>
                 {% endif %}
                 
                 <!-- Quitar el load carrito_tags y usar JS para actualizar -->

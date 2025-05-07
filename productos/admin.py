@@ -81,11 +81,11 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'original_price', 'stock', 'featured', 'main_image') # Added original_price
-    list_filter = ('category', 'featured')
+    list_display = ('name', 'category', 'price', 'original_price', 'stock', 'featured', 'is_reservable', 'main_image')
+    list_filter = ('category', 'featured', 'is_reservable')
     search_fields = ('name', 'description')
     prepopulated_fields = {'slug': ('name',)}
-    list_editable = ('price', 'original_price', 'stock', 'featured') # Added original_price
+    list_editable = ('price', 'original_price', 'stock', 'featured', 'is_reservable')
     inlines = [ProductImageInline, ProductFeatureInline]
     save_on_top = True
     
@@ -94,11 +94,15 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('name', 'slug', 'category')
         }),
         ('Detalles del producto', {
-            'fields': ('description', 'price', 'original_price', 'stock') # Added original_price here
+            'fields': ('description', 'price', 'original_price', 'stock')
         }),
         ('Opciones de visualización', {
             'fields': ('featured', 'image'),
             'description': 'Configure si el producto debe destacarse en la página principal.'
+        }),
+        ('Opciones de reserva', {
+            'fields': ('is_reservable', 'min_reservation_days'),
+            'description': 'Configure si el producto puede ser reservado y por cuántos días mínimo.'
         }),
     )
     

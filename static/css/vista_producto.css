@@ -322,6 +322,46 @@
     font-size: 1.2rem;
 }
 
+/* Reservation Button & Info */
+.producto-reserva {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #2196f3;
+}
+
+.btn-reserva {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #2196f3;
+    color: white;
+    padding: 0.75rem 1.2rem;
+    border-radius: 4px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.btn-reserva:hover {
+    background-color: #1976d2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-reserva i {
+    font-size: 1.1rem;
+}
+
+.reserva-info {
+    color: #0d47a1;
+    line-height: 1.5;
+    margin: 0;
+}
 
 /* Additional Details Section */
 .producto-detalles-adicionales {
