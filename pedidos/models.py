@@ -322,6 +322,7 @@ class Reserva(models.Model):
     ESTADO_CHOICES = (
         ('solicitada', 'Solicitada'),
         ('confirmada', 'Confirmada'),
+        ('anticipo_pendiente', 'Anticipo Pendiente'),
         ('pagada', 'Pagada parcialmente'),
         ('lista', 'Lista para entrega'),
         ('convertida', 'Convertida a pedido'),
@@ -339,7 +340,11 @@ class Reserva(models.Model):
     monto_total = models.DecimalField(max_digits=10, decimal_places=2)
     anticipo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
                                 help_text="Monto pagado como anticipo")
+    porcentaje_anticipo = models.DecimalField(max_digits=5, decimal_places=2, default=30,
+                                          help_text="Porcentaje requerido como anticipo")
     fecha_anticipo = models.DateTimeField(null=True, blank=True)
+    comprobante_anticipo = models.ImageField(upload_to='comprobantes/anticipos/', 
+                                         null=True, blank=True)
     
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='solicitada')
     notas_cliente = models.TextField(blank=True, null=True, 
@@ -352,6 +357,16 @@ class Reserva(models.Model):
     pedido_creado = models.ForeignKey(Pedido, null=True, blank=True, on_delete=models.SET_NULL,
                                     help_text="Pedido generado a partir de esta reserva")
     
+    fecha_limite_anticipo = models.DateTimeField(null=True, blank=True,
+                                             help_text="Fecha límite para realizar el anticipo")
+
+    # Guardar el estado original para detectar cambios
+    __original_estado = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__original_estado = self.estado
+
     def __str__(self):
         return f"Reserva #{self.id} - {self.producto.name} ({self.get_estado_display()})"
     
@@ -361,56 +376,199 @@ class Reserva(models.Model):
         ordering = ['-fecha_solicitud']
 
     def save(self, *args, **kwargs):
-        # Si es una nueva reserva, calcular el monto total
-        if not self.pk and not self.monto_total:
+        is_new = self._state.adding
+        estado_cambiado = False
+        estado_anterior = None
+
+        if not is_new and self.estado != self.__original_estado:
+            estado_cambiado = True
+            estado_anterior = self.__original_estado
+
+        if not self.pk:
             self.monto_total = self.producto.price * self.cantidad
+            self.fecha_limite_anticipo = timezone.now() + timezone.timedelta(hours=48)
             
-        # Si se está guardando un anticipo por primera vez
         if self.anticipo and not self.fecha_anticipo:
             self.fecha_anticipo = timezone.now()
-            # Si hay anticipo, actualizar el estado a "pagada parcialmente"
-            if self.estado == 'solicitada' or self.estado == 'confirmada':
+            if self.estado in ['solicitada', 'confirmada', 'anticipo_pendiente']:
                 self.estado = 'pagada'
+                estado_cambiado = True
                 
         super().save(*args, **kwargs)
-    
+
+        # Si es nueva o cambió de estado, crear seguimiento
+        if is_new or estado_cambiado:
+            descripcion = self._generar_descripcion_seguimiento(estado_anterior if estado_cambiado else None)
+            whatsapp_url = self._generar_notificacion_whatsapp() if self.estado in ['lista', 'confirmada', 'convertida'] else None
+            
+            SeguimientoReserva.objects.create(
+                reserva=self,
+                estado=self.estado,
+                descripcion=descripcion,
+                whatsapp_notification_url=whatsapp_url,
+                whatsapp_sent=bool(whatsapp_url)
+            )
+        
+        self.__original_estado = self.estado
+
+    def _generar_descripcion_seguimiento(self, estado_anterior=None):
+        """Genera la descripción apropiada para el seguimiento según el estado"""
+        if estado_anterior:
+            base = f"Estado cambiado de {dict(self.ESTADO_CHOICES)[estado_anterior]} a {self.get_estado_display()}. "
+        else:
+            base = ""
+
+        if self.estado == 'solicitada':
+            return base + "Reserva creada y en espera de confirmación."
+        elif self.estado == 'confirmada':
+            return base + "Reserva confirmada por la tienda."
+        elif self.estado == 'anticipo_pendiente':
+            return base + f"Anticipo del {self.porcentaje_anticipo}% pendiente de pago."
+        elif self.estado == 'pagada':
+            return base + f"Anticipo de {self.anticipo} Bs registrado."
+        elif self.estado == 'lista':
+            return base + "Producto disponible para entrega."
+        elif self.estado == 'convertida':
+            return base + f"Reserva convertida a pedido #{self.pedido_creado.id if self.pedido_creado else ''}."
+        elif self.estado == 'cancelada':
+            return base + "Reserva cancelada." + (f" Motivo: {self.notas_admin}" if self.notas_admin else "")
+        return base
+
+    def _generar_notificacion_whatsapp(self):
+        """Genera la notificación de WhatsApp según el estado actual"""
+        if not hasattr(self.usuario, 'perfil') or not self.usuario.perfil.telefono:
+            return None
+
+        mensaje = f"*SAGITARIO STORE - Actualización de Reserva*\n\n"
+        mensaje += f"¡Hola {self.usuario.first_name}!\n"
+        
+        if self.estado == 'confirmada':
+            mensaje += f"Tu reserva #{self.id} ha sido confirmada.\n\n"
+            mensaje += f"Producto: {self.producto.name}\n"
+            mensaje += f"Cantidad: {self.cantidad}\n"
+            mensaje += f"Total: {self.monto_total} Bs\n"
+            if self.fecha_llegada_estimada:
+                mensaje += f"Fecha estimada de llegada: {self.fecha_llegada_estimada.strftime('%d/%m/%Y')}\n"
+        elif self.estado == 'lista':
+            mensaje += f"¡Tu producto ya está disponible!\n\n"
+            mensaje += f"Reserva #{self.id} - {self.producto.name}\n"
+            mensaje += "Puedes convertir tu reserva en un pedido desde nuestra página web."
+        elif self.estado == 'convertida':
+            mensaje += f"Tu reserva #{self.id} ha sido convertida exitosamente al pedido #{self.pedido_creado.id}.\n"
+            mensaje += "Puedes continuar con el proceso de pago desde nuestra página web."
+
+        return WhatsAppNotificationService._generate_whatsapp_url(
+            self.usuario.perfil.telefono,
+            mensaje
+        )
+
     def confirmar_reserva(self):
         """Confirma la reserva por parte del administrador"""
-        self.estado = 'confirmada'
-        self.save()
-        return True
-    
-    def registrar_anticipo(self, monto):
+        if self.estado == 'solicitada':
+            self.estado = 'anticipo_pendiente'
+            self.save()
+            return True
+        return False
+
+    def registrar_anticipo(self, monto, comprobante=None):
         """Registra un anticipo para la reserva"""
+        if monto < self.calcular_anticipo_requerido():
+            raise ValueError(f"El anticipo debe ser al menos el {self.porcentaje_anticipo}% del monto total")
+        
         self.anticipo = monto
+        if comprobante:
+            self.comprobante_anticipo = comprobante
         self.estado = 'pagada'
         self.fecha_anticipo = timezone.now()
         self.save()
         return True
-    
+
     def marcar_como_lista(self):
         """Marca la reserva como lista para entrega"""
-        self.estado = 'lista'
-        self.save()
-        # Aquí se podría enviar una notificación al cliente
-        self.notificacion_enviada = True
-        self.save(update_fields=['notificacion_enviada'])
-        return True
-    
-    def cancelar_reserva(self):
+        if self.estado == 'pagada':
+            self.estado = 'lista'
+            self.save()
+            return True
+        return False
+
+    def cancelar_reserva(self, motivo=None):
         """Cancela la reserva"""
-        self.estado = 'cancelada'
-        self.save()
-        return True
-    
+        estados_cancelables = ['solicitada', 'confirmada', 'anticipo_pendiente']
+        if self.estado in estados_cancelables:
+            self.estado = 'cancelada'
+            if motivo:
+                self.notas_admin = f"Cancelada: {motivo}"
+            self.save()
+            return True
+        return False
+
     def convertir_a_pedido(self):
         """Convierte la reserva en un pedido formal"""
+        if self.estado != 'lista':
+            raise ValueError("La reserva debe estar lista para entrega antes de convertirla a pedido")
+            
         if self.pedido_creado:
             return self.pedido_creado
+            
+        pedido = Pedido.objects.create(
+            usuario=self.usuario,
+            subtotal=self.monto_total,
+            total=self.monto_total,
+            estado='pendiente'
+        )
         
-        # Aquí iría la lógica para crear un pedido a partir de la reserva
-        # Este método se completaría al implementar la conversión a pedido
+        ItemPedido.objects.create(
+            pedido=pedido,
+            producto=self.producto,
+            cantidad=self.cantidad,
+            precio=self.producto.price,
+            subtotal=self.monto_total
+        )
+        
+        if self.anticipo:
+            Pago.objects.create(
+                pedido=pedido,
+                monto=self.anticipo,
+                estado='completado',
+                metodo_pago='transferencia',
+                referencia=f"Anticipo de reserva #{self.id}",
+                comprobante=self.comprobante_anticipo
+            )
+            if self.anticipo >= self.monto_total:
+                pedido.estado = 'pagado'
+                pedido.save()
         
         self.estado = 'convertida'
+        self.pedido_creado = pedido
         self.save()
-        return None  # Reemplazar con el pedido creado
+        
+        return pedido
+
+    def calcular_anticipo_requerido(self):
+        """Calcula el monto mínimo requerido como anticipo"""
+        return (self.monto_total * self.porcentaje_anticipo / 100)
+
+class SeguimientoReserva(models.Model):
+    """Modelo para almacenar el historial de cambios de estado de las reservas"""
+    reserva = models.ForeignKey(Reserva, related_name='seguimientos', on_delete=models.CASCADE)
+    estado = models.CharField(max_length=20, choices=Reserva.ESTADO_CHOICES)
+    descripcion = models.TextField()
+    fecha = models.DateTimeField(default=timezone.now)
+    whatsapp_notification_url = models.URLField(
+        blank=True, null=True,
+        verbose_name="URL de notificación WhatsApp",
+        help_text="URL generada para enviar notificación por WhatsApp"
+    )
+    whatsapp_sent = models.BooleanField(
+        default=False,
+        verbose_name="Notificación WhatsApp enviada",
+        help_text="Indica si la notificación por WhatsApp fue enviada"
+    )
+
+    def __str__(self):
+        return f"Seguimiento de Reserva #{self.reserva.id} - {self.estado}"
+
+    class Meta:
+        verbose_name = "Seguimiento de reserva"
+        verbose_name_plural = "Seguimientos de reservas"
+        ordering = ['-fecha']

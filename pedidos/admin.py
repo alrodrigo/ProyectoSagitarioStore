@@ -64,7 +64,7 @@ class PedidoAdmin(admin.ModelAdmin):
     list_display = ('id', 'usuario', 'estado', 'total', 'fecha_pedido', 'ultimo_seguimiento', 'whatsapp_status')
     list_filter = ('estado', 'metodo_pago', 'fecha_pedido')
     search_fields = ('id', 'usuario__username', 'usuario__email', 'direccion_envio__nombre_completo')
-    readonly_fields = ('subtotal', 'total', 'costo_envio', 'fecha_pedido', 'fecha_actualizacion', 'historial_seguimiento')
+    readonly_fields = ('fecha_pedido', 'fecha_actualizacion', 'historial_seguimiento')
     inlines = [ItemPedidoInline, PagoInline]
     actions = ['marcar_como_pagado', 'marcar_como_enviado', 'marcar_como_entregado']
     change_form_template = 'admin/pedidos/pedido_change_form.html'
@@ -90,6 +90,26 @@ class PedidoAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+    def save_model(self, request, obj, form, change):
+        # Si es un nuevo pedido y no se han establecido los totales
+        if not change:  # Si es un nuevo pedido
+            if not obj.subtotal:
+                obj.subtotal = 0
+            if not obj.costo_envio:
+                obj.costo_envio = obj.metodo_envio.precio if obj.metodo_envio else 0
+            if not obj.total:
+                obj.total = obj.subtotal + obj.costo_envio
+        
+        super().save_model(request, obj, form, change)
+        
+        # Mostrar mensaje informativo
+        if not change:
+            self.message_user(
+                request,
+                "Pedido creado. No olvide agregar los productos usando la sección 'Items de pedido' abajo.",
+                messages.INFO
+            )
 
     def ultimo_seguimiento(self, obj):
         """Muestra el último estado de seguimiento del pedido"""
@@ -359,8 +379,8 @@ class PagoAdmin(admin.ModelAdmin):
         count_pedidos = 0
         
         for pago in queryset.filter(estado__in=['pendiente', 'procesando']):
-            pago.estado = 'completado'
-            pago.save()
+            # Usar el método completar_pago que maneja la lógica de cambio de estado
+            pago.completar_pago()
             count_pagos += 1
             
             # Actualizar el pedido asociado si existe
@@ -396,10 +416,10 @@ class QRPredefinidoAdmin(admin.ModelAdmin):
 
 @admin.register(Reserva)
 class ReservaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'usuario', 'producto_link', 'cantidad', 'monto_total', 'anticipo', 'estado', 'fecha_solicitud', 'fecha_llegada_estimada')
+    list_display = ('id', 'usuario', 'producto_link', 'cantidad', 'monto_total', 'anticipo', 'estado', 'fecha_solicitud', 'fecha_llegada_estimada', 'whatsapp_status')
     list_filter = ('estado', 'fecha_solicitud', 'fecha_llegada_estimada')
     search_fields = ('usuario__username', 'usuario__email', 'producto__name', 'notas_cliente', 'notas_admin')
-    readonly_fields = ('fecha_solicitud', 'fecha_actualizacion', 'monto_total')
+    readonly_fields = ('fecha_solicitud', 'fecha_actualizacion', 'monto_total', 'historial_seguimiento')
     actions = ['confirmar_reservas', 'marcar_como_listas', 'cancelar_reservas']
     
     fieldsets = (
@@ -412,8 +432,8 @@ class ReservaAdmin(admin.ModelAdmin):
         ('Notas', {
             'fields': ('notas_cliente', 'notas_admin')
         }),
-        ('Estado de seguimiento', {
-            'fields': ('notificacion_enviada', 'pedido_creado')
+        ('Historial de Seguimiento', {
+            'fields': ('historial_seguimiento',),
         }),
     )
     
@@ -462,3 +482,86 @@ class ReservaAdmin(admin.ModelAdmin):
         else:
             self.message_user(request, "No se canceló ninguna reserva", level=messages.WARNING)
     cancelar_reservas.short_description = "Cancelar reservas seleccionadas"
+
+    def whatsapp_status(self, obj):
+        """Muestra si se ha enviado notificación por WhatsApp para el último estado"""
+        ultimo_seguimiento = obj.seguimientos.order_by('-fecha').first()
+        if ultimo_seguimiento and ultimo_seguimiento.whatsapp_sent:
+            return format_html('<span style="color: green;">✓</span>')
+        return format_html('<span style="color: red;">✗</span>')
+    whatsapp_status.short_description = 'WhatsApp'
+
+    def historial_seguimiento(self, obj):
+        """Muestra el historial de seguimientos en formato HTML"""
+        seguimientos = obj.seguimientos.all().order_by('-fecha')
+        if not seguimientos:
+            return "No hay seguimientos registrados."
+        
+        html = '<div style="max-height: 300px; overflow-y: auto;">'
+        html += '<table style="width:100%; border-collapse: collapse;">'
+        html += '<tr style="background-color: #f2f2f2;"><th style="padding: 8px; text-align: left;">Fecha</th><th style="padding: 8px; text-align: left;">Estado</th><th style="padding: 8px; text-align: left;">Descripción</th><th style="padding: 8px; text-align: center;">WhatsApp</th></tr>'
+        
+        for s in seguimientos:
+            whatsapp_icon = '✓' if s.whatsapp_sent else '✗'
+            whatsapp_color = 'green' if s.whatsapp_sent else 'red'
+            
+            html += f'<tr style="border-bottom: 1px solid #ddd;">'
+            html += f'<td style="padding: 8px;">{s.fecha.strftime("%d/%m/%Y %H:%M")}</td>'
+            html += f'<td style="padding: 8px;">{s.get_estado_display()}</td>'
+            html += f'<td style="padding: 8px;">{s.descripcion}</td>'
+            html += f'<td style="padding: 8px; text-align: center;"><span style="color: {whatsapp_color};">{whatsapp_icon}</span></td>'
+            html += '</tr>'
+        
+        html += '</table></div>'
+        return format_html(html)
+    historial_seguimiento.short_description = 'Historial de seguimiento'
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<path:object_id>/enviar-whatsapp/',
+                self.admin_site.admin_view(self.send_whatsapp_view),
+                name='reserva-enviar-whatsapp',
+            ),
+        ]
+        return custom_urls + urls
+
+    def save_model(self, request, obj, form, change):
+        estado_anterior = None
+        if change:  # Si es una edición
+            try:
+                reserva_anterior = Reserva.objects.get(pk=obj.pk)
+                if reserva_anterior.estado != obj.estado:
+                    estado_anterior = reserva_anterior.estado
+            except Reserva.DoesNotExist:
+                pass
+        
+        super().save_model(request, obj, form, change)
+        
+        # Si el estado cambió, intentar enviar notificación WhatsApp
+        if estado_anterior and estado_anterior != obj.estado:
+            self.enviar_whatsapp_estado(request, obj)
+
+    def enviar_whatsapp_estado(self, request, obj):
+        """Envía notificación WhatsApp basada en el estado actual"""
+        if not hasattr(obj.usuario, 'perfil') or not obj.usuario.perfil.telefono:
+            self.message_user(request, "No se pudo enviar WhatsApp: El usuario no tiene número de teléfono registrado", level=messages.WARNING)
+            return
+
+        result = obj._generar_notificacion_whatsapp()
+        if result:
+            ultimo_seguimiento = obj.seguimientos.order_by('-fecha').first()
+            if ultimo_seguimiento:
+                ultimo_seguimiento.whatsapp_sent = True
+                ultimo_seguimiento.whatsapp_notification_url = result
+                ultimo_seguimiento.save()
+                self.message_user(request, "Notificación WhatsApp enviada correctamente")
+        else:
+            self.message_user(request, "Error al enviar notificación WhatsApp", level=messages.ERROR)
+
+    def send_whatsapp_view(self, request, object_id):
+        """Vista para enviar una notificación de WhatsApp manualmente"""
+        reserva = self.get_object(request, object_id)
+        self.enviar_whatsapp_estado(request, reserva)
+        return HttpResponseRedirect(reverse('admin:pedidos_reserva_change', args=[object_id]))

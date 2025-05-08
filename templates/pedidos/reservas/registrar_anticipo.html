@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Registrar Anticipo - Reserva #{{ reserva.id }} - Sagitario Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    .anticipo-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .anticipo-breadcrumb {
+        margin-bottom: 1.5rem;
+    }
+
+    .anticipo-breadcrumb a {
+        color: #6c757d;
+        text-decoration: none;
+    }
+
+    .anticipo-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-reserva {
+        background-color: #e3f2fd;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #2196f3;
+    }
+
+    .info-reserva p {
+        margin: 0;
+        color: #0d47a1;
+    }
+
+    .info-reserva p + p {
+        margin-top: 0.5rem;
+    }
+
+    .producto-info {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .producto-imagen {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .producto-detalles {
+        flex: 1;
+    }
+
+    .producto-nombre {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: #212529;
+    }
+
+    .anticipo-form {
+        margin-top: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .form-alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-submit {
+        background-color: #2196f3;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-submit:hover {
+        background-color: #1976d2;
+    }
+
+    .btn-cancel {
+        background-color: #fff;
+        color: #dc3545;
+        border: 1px solid #dc3545;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .producto-info {
+            flex-direction: column;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-submit, .btn-cancel {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="anticipo-container">
+    <div class="anticipo-breadcrumb">
+        <a href="{% url 'pedidos:detalle_reserva' reserva.id %}">
+            <i class="fas fa-chevron-left"></i> Volver a los detalles de la reserva
+        </a>
+    </div>
+
+    <div class="anticipo-card">
+        <h1>Registrar Anticipo - Reserva #{{ reserva.id }}</h1>
+
+        <div class="info-reserva">
+            <p><i class="fas fa-info-circle"></i> Para confirmar tu reserva, necesitas realizar el pago del anticipo antes de {{ fecha_limite|date:"d/m/Y H:i" }}.</p>
+            <p>El monto mínimo requerido es de {{ anticipo_minimo|floatformat:2 }} Bs ({{ reserva.porcentaje_anticipo }}% del total).</p>
+        </div>
+
+        <div class="producto-info">
+            <img src="{{ reserva.producto.image.url }}" alt="{{ reserva.producto.name }}" class="producto-imagen">
+            <div class="producto-detalles">
+                <h2 class="producto-nombre">{{ reserva.producto.name }}</h2>
+                <p class="producto-precio">Precio unitario: {{ reserva.producto.price }} Bs</p>
+                <p class="producto-cantidad">Cantidad reservada: {{ reserva.cantidad }}</p>
+                <p class="producto-total">Total de la reserva: {{ reserva.monto_total }} Bs</p>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="anticipo-form">
+            {% csrf_token %}
+
+            <div class="form-alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                El comprobante debe ser una imagen clara del depósito o transferencia realizada.
+            </div>
+
+            <div class="form-group">
+                <label for="monto" class="form-label">Monto del anticipo</label>
+                <input type="number" id="monto" name="monto" class="form-input" 
+                       min="{{ anticipo_minimo }}" max="{{ reserva.monto_total }}" 
+                       step="0.01" required>
+                <small class="form-text">Ingresa el monto exacto que has depositado o transferido.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="comprobante" class="form-label">Comprobante de pago</label>
+                <input type="file" id="comprobante" name="comprobante" class="form-input" 
+                       accept="image/*" required>
+                <small class="form-text">Formatos aceptados: JPG, PNG, GIF. Tamaño máximo: 5MB</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-check"></i> Registrar Anticipo
+                </button>
+                <a href="{% url 'pedidos:detalle_reserva' reserva.id %}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const montoInput = document.getElementById('monto');
+        const anticipoMinimo = parseFloat('{{ anticipo_minimo|stringformat:".2f" }}');
+        const montoTotal = parseFloat('{{ reserva.monto_total|stringformat:".2f" }}');
+
+        montoInput.addEventListener('input', function() {
+            const valor = parseFloat(this.value) || 0;
+            if (valor < anticipoMinimo) {
+                this.setCustomValidity(`El anticipo debe ser al menos ${anticipoMinimo.toFixed(2)} Bs`);
+            } else if (valor > montoTotal) {
+                this.setCustomValidity(`El monto no puede ser mayor al total de la reserva (${montoTotal.toFixed(2)} Bs`);
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Validar inicialmente
+        montoInput.dispatchEvent(new Event('input'));
+    });
+</script>
+{% endblock %}

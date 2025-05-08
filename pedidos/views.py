@@ -660,14 +660,14 @@ def detalle_reserva(request, reserva_id):
     Muestra los detalles de una reserva específica
     """
     try:
-        reserva = Reserva.objects.get(id=reserva_id, usuario=request.user)
+        reserva = Reserva.objects.select_related('pedido_creado').get(id=reserva_id, usuario=request.user)
     except Reserva.DoesNotExist:
         messages.error(request, 'La reserva solicitada no existe o no tienes permiso para verla.')
         return redirect('pedidos:mis_reservas')
     
-    # Si la reserva ha sido convertida a pedido, mostrar también el pedido
+    # Si la reserva ha sido convertida a pedido, verificar que el pedido exista
     pedido = None
-    if reserva.pedido_creado:
+    if reserva.estado == 'convertida' and reserva.pedido_creado:
         pedido = reserva.pedido_creado
     
     context = {
@@ -676,6 +676,7 @@ def detalle_reserva(request, reserva_id):
         'estados_badges': {
             'solicitada': 'badge-info',
             'confirmada': 'badge-primary',
+            'anticipo_pendiente': 'badge-warning',
             'pagada': 'badge-success',
             'lista': 'badge-warning',
             'convertida': 'badge-secondary',
@@ -762,3 +763,102 @@ def cancelar_reserva(request, reserva_id):
     }
     
     return render(request, 'pedidos/reservas/confirmar_cancelacion.html', context)
+
+@login_required
+def registrar_anticipo_reserva(request, reserva_id):
+    """Vista para que el usuario registre el anticipo de una reserva"""
+    try:
+        reserva = Reserva.objects.get(id=reserva_id, usuario=request.user)
+    except Reserva.DoesNotExist:
+        messages.error(request, 'La reserva no existe o no tienes permiso para verla.')
+        return redirect('pedidos:mis_reservas')
+        
+    if reserva.estado != 'anticipo_pendiente':
+        messages.error(request, 'Esta reserva no está en estado de anticipo pendiente.')
+        return redirect('pedidos:detalle_reserva', reserva_id=reserva.id)
+    
+    anticipo_minimo = reserva.calcular_anticipo_requerido()
+    
+    if request.method == 'POST':
+        monto = request.POST.get('monto')
+        comprobante = request.FILES.get('comprobante')
+        
+        if not monto or not comprobante:
+            messages.error(request, 'Por favor proporciona el monto y el comprobante del anticipo.')
+            return redirect('pedidos:registrar_anticipo_reserva', reserva_id=reserva.id)
+        
+        try:
+            monto = float(monto)
+            if monto < anticipo_minimo:
+                messages.error(request, f'El anticipo debe ser al menos {anticipo_minimo} Bs ({reserva.porcentaje_anticipo}% del total)')
+                return redirect('pedidos:registrar_anticipo_reserva', reserva_id=reserva.id)
+                
+            reserva.registrar_anticipo(monto, comprobante)
+            messages.success(request, 'Anticipo registrado correctamente. Revisaremos tu comprobante pronto.')
+            return redirect('pedidos:detalle_reserva', reserva_id=reserva.id)
+            
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('pedidos:registrar_anticipo_reserva', reserva_id=reserva.id)
+    
+    context = {
+        'reserva': reserva,
+        'anticipo_minimo': anticipo_minimo,
+        'fecha_limite': reserva.fecha_limite_anticipo,
+    }
+    
+    return render(request, 'pedidos/reservas/registrar_anticipo.html', context)
+
+@login_required
+def verificar_anticipo_reserva(request, reserva_id):
+    """Vista para que el admin verifique el anticipo de una reserva"""
+    if not request.user.is_staff:
+        messages.error(request, 'No tienes permiso para realizar esta acción.')
+        return redirect('pedidos:detalle_reserva', reserva_id=reserva_id)
+        
+    try:
+        reserva = Reserva.objects.get(id=reserva_id)
+    except Reserva.DoesNotExist:
+        messages.error(request, 'La reserva no existe.')
+        return redirect('admin:pedidos_reserva_changelist')
+    
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+        
+        if accion == 'aprobar':
+            reserva.estado = 'pagada'
+            reserva.save()
+            messages.success(request, 'Anticipo verificado y aprobado correctamente.')
+        elif accion == 'rechazar':
+            motivo = request.POST.get('motivo_rechazo')
+            reserva.estado = 'anticipo_pendiente'
+            if motivo:
+                reserva.notas_admin = f"Anticipo rechazado: {motivo}"
+            reserva.save()
+            messages.warning(request, 'Anticipo rechazado. Se ha notificado al cliente.')
+            
+    return redirect('admin:pedidos_reserva_change', object_id=reserva.id)
+
+@login_required
+def convertir_reserva(request, reserva_id):
+    """
+    Convierte una reserva en estado 'lista' a un pedido formal
+    """
+    try:
+        reserva = Reserva.objects.get(id=reserva_id, usuario=request.user)
+    except Reserva.DoesNotExist:
+        messages.error(request, 'La reserva no existe o no tienes permiso para verla.')
+        return redirect('pedidos:mis_reservas')
+    
+    if reserva.estado != 'lista':
+        messages.error(request, 'La reserva debe estar lista para entrega antes de convertirla a pedido.')
+        return redirect('pedidos:detalle_reserva', reserva_id=reserva.id)
+
+    try:
+        # Usar el método del modelo para convertir la reserva a pedido
+        pedido = reserva.convertir_a_pedido()
+        messages.success(request, 'Reserva convertida a pedido exitosamente.')
+        return redirect('pedidos:detalle_pedido', pedido_id=pedido.id)
+    except ValueError as e:
+        messages.error(request, str(e))
+        return redirect('pedidos:detalle_reserva', reserva_id=reserva.id)

@@ -63,18 +63,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitButton = this.querySelector('button[type="submit"]');
             const originalHTML = submitButton.innerHTML;
             
-            // Verificar si el producto está agotado
             const stockInput = this.querySelector('input[name="cantidad"]');
             const maxStock = parseInt(stockInput.getAttribute('max') || '0');
             const quantity = parseInt(stockInput.value);
             
+            // Una sola validación de stock
             if (maxStock <= 0) {
-                showNotification('<i class="fas fa-times-circle"></i> Producto agotado', 'error');
+                showNotification('<i class="fas fa-exclamation-circle"></i> Producto agotado', 'error');
                 return;
             }
             
-            if (quantity <= 0 || quantity > maxStock) {
-                showNotification('<i class="fas fa-exclamation-circle"></i> Cantidad inválida', 'error');
+            if (quantity > maxStock) {
+                showNotification(`<i class="fas fa-exclamation-circle"></i> Solo hay ${maxStock} unidades disponibles de este producto`, 'warning');
                 return;
             }
             
